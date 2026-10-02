@@ -1,0 +1,2 @@
+Sample attachment for the Contact Us upload test.
+If this file shows up in a report, the upload step worked.

@@ -25,7 +25,8 @@
     "update:snapshots:docker": "docker run --rm --ipc=host -v \"$PWD\":/work -v /work/node_modules -w /work mcr.microsoft.com/playwright:v1.63.0-noble /bin/bash -c \"npm ci && npx playwright test --grep @visual --project=chromium --update-snapshots\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "typecheck": "tsc -p jsconfig.json"
   },
   "keywords": [
     "playwright",
@@ -55,7 +56,8 @@
     "globals": "^17.13.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "prettier": "^3.9.9"
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
   },
   "private": true,
   "engines": {

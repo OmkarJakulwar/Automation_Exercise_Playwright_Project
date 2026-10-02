@@ -1,0 +1,19 @@
+{
+  "invalidLogins": [
+    {
+      "case": "unknown email",
+      "email": "nobody.registered.here@example.com",
+      "password": "WrongPass123!"
+    },
+    {
+      "case": "valid-looking email with wrong password",
+      "email": "wrong.password.check@example.com",
+      "password": "not-the-password"
+    },
+    {
+      "case": "email with different casing",
+      "email": "NOBODY.REGISTERED.HERE@EXAMPLE.COM",
+      "password": "WrongPass123!"
+    }
+  ]
+}

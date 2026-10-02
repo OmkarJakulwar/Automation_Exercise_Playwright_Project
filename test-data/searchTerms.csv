@@ -1,0 +1,8 @@
+# The site matches on product name OR category, so a term can return items whose name doesn't
+# contain it (e.g. "top" brings back "Little Girls Mr. Panda Shirt" from the Tops & Shirts category).
+term,minResults
+top,10
+tshirt,5
+jeans,3
+saree,3
+dress,5

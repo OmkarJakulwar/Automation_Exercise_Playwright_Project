@@ -18,11 +18,12 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 - [x] npm scripts
 
 ## Phase 2 - Core framework
-- [ ] BasePage + components (Header, Footer, CategorySidebar, BrandSidebar)
-- [ ] All page objects
-- [ ] Fixtures: page objects, adBlocker (auto), consent handler, apiClient, testUser, worker-scoped example
-- [ ] dataFactory (faker) + test-data files
-- [ ] Smoke test TC01 passing
+- [x] BasePage + components (Header, Footer, CategorySidebar, BrandSidebar)
+- [x] All page objects
+- [x] Fixtures: page objects, adBlocker (auto), consent handler, apiClient, testUser, worker-scoped example
+- [x] dataFactory (faker) + test-data files
+- [x] Smoke test TC01 passing
+- [x] `npm run typecheck` (tsc over JSDoc, strict) - zero errors
 
 ## Phase 3 - API layer and API tests
 - [ ] ApiClient, ProductsApi, BrandsApi, AccountApi

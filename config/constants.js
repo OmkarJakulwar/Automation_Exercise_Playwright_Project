@@ -1,0 +1,45 @@
+// @ts-check
+
+// Text the site shows back to the user. Kept in one place so a copy change on the site is a
+// one-line fix here instead of a hunt through every spec.
+const MESSAGES = Object.freeze({
+  heroTagline: 'Full-Fledged practice website for Automation Engineers',
+  loginHeading: 'Login to your account',
+  signupHeading: 'New User Signup!',
+  enterAccountInfo: 'Enter Account Information',
+  accountCreated: 'Account Created!',
+  accountDeleted: 'Account Deleted!',
+  loginError: 'Your email or password is incorrect!',
+  emailExists: 'Email Address already exist!',
+  getInTouch: 'Get In Touch',
+  contactSuccess: 'Success! Your details have been submitted successfully.',
+  subscription: 'Subscription',
+  subscribed: 'You have been successfully subscribed!',
+  allProducts: 'All Products',
+  searchedProducts: 'Searched Products',
+  reviewHeading: 'Write Your Review',
+  reviewThanks: 'Thank you for your review.',
+  recommendedItems: 'recommended items',
+  cartEmpty: 'Cart is empty!',
+  orderPlaced: 'Order Placed!',
+  orderConfirmed: 'Congratulations! Your order has been confirmed!',
+});
+
+// Hosts that serve ads, tracking and the EU consent banner. Blocking them keeps pages fast and
+// stops the full-page "#google_vignette" ad from hijacking navigation mid-test.
+const BLOCKED_HOSTS = Object.freeze([
+  'googlesyndication.com',
+  'doubleclick.net',
+  'googleadservices.com',
+  'google-analytics.com',
+  'googletagmanager.com',
+  'adservice.google.com',
+  'adtrafficquality.google',
+  'fundingchoicesmessages.google.com',
+]);
+
+// The consent banner comes from Funding Choices. It's in BLOCKED_HOSTS above, so normally it
+// never loads, but a test can drop it from the list to exercise the locator handler.
+const CONSENT_HOST = 'fundingchoicesmessages.google.com';
+
+module.exports = { MESSAGES, BLOCKED_HOSTS, CONSENT_HOST };

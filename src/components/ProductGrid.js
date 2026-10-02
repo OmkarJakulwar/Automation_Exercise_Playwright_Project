@@ -1,0 +1,124 @@
+// @ts-check
+const { CartModal } = require('./CartModal');
+
+/**
+ * @typedef {object} ProductCardInfo
+ * @property {string} name
+ * @property {string} price - as shown, e.g. "Rs. 500"
+ */
+
+/**
+ * A grid of product cards. The home page, products page, category/brand pages and search results
+ * all use the same markup, and so does the "recommended items" carousel, so one component
+ * covers all of them - pass the container selector for the one you want.
+ */
+class ProductGrid {
+  /**
+   * @param {import('@playwright/test').Page} page
+   * @param {string} [rootSelector] - container around the cards
+   */
+  constructor(page, rootSelector = '.features_items') {
+    this.page = page;
+    // The cards are plain divs with no roles or test ids, so CSS classes are all we can use here.
+    this.root = page.locator(rootSelector);
+    this.title = this.root.getByRole('heading', { level: 2 }).first();
+    this.cards = this.root.locator('.product-image-wrapper');
+    this.cartModal = new CartModal(page);
+  }
+
+  /**
+   * Card for a product, matched on its exact name.
+   * @param {string} name
+   * @returns {import('@playwright/test').Locator}
+   */
+  card(name) {
+    return this.cards.filter({
+      has: this.page.locator('.productinfo').getByText(name, { exact: true }),
+    });
+  }
+
+  /**
+   * Walks every card and reads its name and price. Only cards that are actually rendered
+   * count - the recommended carousel keeps hidden slides in the DOM.
+   * @returns {Promise<ProductCardInfo[]>}
+   */
+  async products() {
+    /** @type {ProductCardInfo[]} */
+    const result = [];
+    for (const card of await this.cards.all()) {
+      const info = card.locator('.productinfo');
+      if (!(await info.isVisible())) continue;
+      result.push({
+        name: (await info.locator('p').innerText()).trim(),
+        price: (await info.getByRole('heading').innerText()).trim(),
+      });
+    }
+    return result;
+  }
+
+  /**
+   * @returns {Promise<string[]>}
+   */
+  async productNames() {
+    return (await this.products()).map((p) => p.name);
+  }
+
+  /**
+   * Hovers a card and clicks the "Add to cart" button in its overlay, then waits for the
+   * "Added!" popup. We wait on the add_to_cart request too, because the popup can show up
+   * a moment before the server has stored the item.
+   * @param {import('@playwright/test').Locator} card
+   * @returns {Promise<void>}
+   */
+  async addCardToCart(card) {
+    await card.scrollIntoViewIfNeeded();
+    await card.hover();
+    // The hover overlay only exists on listing grids; the recommended carousel has no overlay,
+    // so fall back to the button inside the card itself.
+    const overlayButton = card.locator('.product-overlay').getByText('Add to cart');
+    const button = (await overlayButton.count()) > 0 ? overlayButton : card.getByText('Add to cart');
+    await Promise.all([
+      this.page.waitForResponse((r) => r.url().includes('/add_to_cart/') && r.ok()),
+      button.click(),
+    ]);
+    await this.cartModal.title.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Adds the product with this name to the cart.
+   * @param {string} name
+   * @returns {Promise<void>}
+   */
+  async addProductToCart(name) {
+    await this.addCardToCart(this.card(name));
+  }
+
+  /**
+   * Adds the n-th visible product (0-based) to the cart and returns what was added.
+   * @param {number} index
+   * @returns {Promise<ProductCardInfo>}
+   */
+  async addProductToCartByIndex(index) {
+    const card = this.cards.nth(index);
+    const info = card.locator('.productinfo');
+    const product = {
+      name: (await info.locator('p').innerText()).trim(),
+      price: (await info.getByRole('heading').innerText()).trim(),
+    };
+    await this.addCardToCart(card);
+    return product;
+  }
+
+  /**
+   * Clicks "View Product" on a card.
+   * @param {string | number} nameOrIndex - product name, or 0-based position in the grid
+   * @returns {Promise<void>}
+   */
+  async viewProduct(nameOrIndex) {
+    const card = typeof nameOrIndex === 'number' ? this.cards.nth(nameOrIndex) : this.card(nameOrIndex);
+    await card.getByRole('link', { name: 'View Product' }).click();
+    await this.page.waitForURL('**/product_details/**');
+  }
+}
+
+module.exports = { ProductGrid };

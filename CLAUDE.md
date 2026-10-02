@@ -19,8 +19,10 @@ comment in the test explaining the difference.
 
 ```
 config/environments.js   base URLs and settings per env (qa, staging, prod), picked by ENV
+config/constants.js      UI messages the site shows + ad/consent hosts we block
 src/pages/               page objects (BasePage + one class per page)
-src/components/          UI parts shared by many pages (header, footer, sidebars)
+src/components/          UI parts shared by many pages (header, footer, sidebars,
+                         product grid, "Added!" cart modal)
 src/api/                 ApiClient + one class per API area
 src/fixtures/index.js    custom `test` and `expect` - always import from here in specs
 src/utils/               dataFactory (faker), fileHelper, apiResponse, logger
@@ -46,6 +48,7 @@ npm run test:api            # API project only, no browser
 npm run test:smoke          # --grep @smoke
 npx playwright test tests/ui/auth/register.spec.js --project=chromium
 npm run lint                # must pass with zero errors
+npm run typecheck           # tsc over the JSDoc types, must pass too
 npm run report              # open last HTML report
 ```
 
@@ -62,7 +65,16 @@ The full script list lives in `package.json` and the README.
 - Every JS file starts with `// @ts-check` and uses JSDoc types. Public methods get a one-line
   description plus `@param` / `@returns`.
 - CommonJS (`require` / `module.exports`) to match the scaffold.
-- Specs import `test` and `expect` from `src/fixtures`, never from `@playwright/test` directly.
+- In JSDoc, refer to classes from other files as `import('../pages/HomePage').HomePage`.
+- `typescript` is pinned to 5.x on purpose: TS 7's native compiler dropped CommonJS export types
+  in JSDoc, which breaks `npm run typecheck`. VS Code still uses TS 5 for JS files, so it matches.
+- Specs import from `src/fixtures`, never from `@playwright/test` directly:
+  - UI / hybrid specs: `const { test, expect } = require('.../src/fixtures')`
+  - API specs: `const { apiTest: test, expect } = require('.../src/fixtures')` - this one has
+    no browser fixtures, so the api project never starts a browser.
+- Fixtures worth knowing: `testUser` (registered via API, deleted after), `newUser` (data only,
+  deleted after in case the test registered it), `productCatalog` (worker-scoped),
+  `adBlockHosts` (option - override with `test.use()`).
 - Page objects:
   - locators defined once (constructor fields or getters), never duplicated across files
   - methods are async and named by user intent (`addProductToCart(name)`, `login(email, pw)`)
@@ -74,6 +86,9 @@ The full script list lives in `package.json` and the README.
 - No magic strings in specs: URLs, messages and data live in `config/` or `test-data/`.
 - **Never use `page.waitForTimeout()`.** Use web-first assertions, `waitForResponse`,
   `waitForURL`, `expect.poll` or `toPass`. ESLint enforces this.
+- After any click that navigates, wait for the new URL (`waitForURL` waits for `load`). Lots of
+  buttons on this site are wired up by jQuery on load; clicking too early silently does nothing
+  (search button) or does a native form POST (Contact Us). Header nav methods already do this.
 - Tests are independent and parallel-safe: unique data per test (faker + timestamp) and delete
   created accounts through the API in teardown (the `testUser` fixture does this).
 - Test titles: `TC01 - Register User` for official cases. Use `test.step` for each numbered step.
@@ -88,6 +103,13 @@ The full script list lives in `package.json` and the README.
 - The API almost always answers HTTP 200; the real status is `body.responseCode`. Assert both.
 - Several endpoints want form data, not JSON - use the `form` option.
 - Some JSON responses come back as `text/html`. Parse with the helper in `src/utils/apiResponse.js`.
+- Contact Us success writes the message into *every* `.alert-success`, including the hidden one in
+  the footer - scope to `#contact-page`.
+- Payment: the "Your order has been placed successfully!" alert never shows; the form goes straight
+  to `/payment_done/<id>` ("Order Placed!"). We assert on that page.
+- Category headings' accessible names start with an icon glyph (" Women"), so match with a regex.
+- Product search matches name OR category, so results don't always contain the search term.
+- The country dropdown only has 7 values - `COUNTRIES` in `dataFactory.js`.
 
 ## Commenting style
 
