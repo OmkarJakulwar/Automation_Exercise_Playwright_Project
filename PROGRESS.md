@@ -12,10 +12,10 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 - [x] `git init` + first commit
 
 ## Phase 1 - Configuration
-- [ ] `playwright.config.js` (baseURL from env, `testIdAttribute: 'data-qa'`, timeouts, retries, workers, reporters, trace/screenshot/video)
-- [ ] Projects: setup, chromium, firefox, webkit, mobile-chrome, mobile-safari, api (no browser)
-- [ ] `config/environments.js` + dotenv loading
-- [ ] npm scripts
+- [x] `playwright.config.js` (baseURL from env, `testIdAttribute: 'data-qa'`, timeouts, retries, workers, reporters, trace/screenshot/video)
+- [x] Projects: setup, chromium, firefox, webkit, mobile-chrome, mobile-safari, api (no browser)
+- [x] `config/environments.js` + dotenv loading
+- [x] npm scripts
 
 ## Phase 2 - Core framework
 - [ ] BasePage + components (Header, Footer, CategorySidebar, BrandSidebar)
