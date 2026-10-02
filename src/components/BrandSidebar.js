@@ -37,8 +37,9 @@ class BrandSidebar {
    * @returns {Promise<string[]>}
    */
   async names() {
-    const texts = await this.links.allInnerTexts();
-    return texts.map((t) => t.replace(/^\(\d+\)\s*/, '').trim());
+    // textContent, not innerText: the sidebar is uppercased with CSS and innerText returns "POLO".
+    const texts = await this.links.allTextContents();
+    return texts.map((t) => t.trim().replace(/^\(\d+\)\s*/, ''));
   }
 }
 

@@ -46,16 +46,16 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 - [x] Product images stubbed by default (`stubProductImages` option) - real ones held `load` back 10-25s
 
 ## Phase 5 - UI: products & cart
-- [ ] TC08 All products & product detail
-- [ ] TC09 Search product (+ CSV data-driven)
-- [ ] TC12 Add products to cart
-- [ ] TC13 Product quantity in cart
-- [ ] TC17 Remove products from cart
-- [ ] TC18 Category products (+ JSON loop)
-- [ ] TC19 Brand products (+ JSON loop)
-- [ ] TC20 Search products and verify cart after login
-- [ ] TC21 Add review on product
-- [ ] TC22 Add to cart from recommended items
+- [x] TC08 All products & product detail
+- [x] TC09 Search product (+ CSV data-driven, expected results from the search API)
+- [x] TC12 Add products to cart
+- [x] TC13 Product quantity in cart
+- [x] TC17 Remove products from cart
+- [x] TC18 Category products (+ JSON loop, checked against the product catalogue)
+- [x] TC19 Brand products (+ JSON loop, checked against the product catalogue)
+- [x] TC20 Search products and verify cart after login
+- [x] TC21 Add review on product
+- [x] TC22 Add to cart from recommended items
 
 ## Phase 6 - UI: checkout
 - [ ] `tests/auth.setup.js` + storageState

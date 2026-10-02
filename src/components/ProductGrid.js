@@ -7,6 +7,8 @@ const { CartModal } = require('./CartModal');
  * @property {string} price - as shown, e.g. "Rs. 500"
  */
 
+/** @typedef {ProductCardInfo & { id: number }} AddedProduct */
+
 /**
  * A grid of product cards. The home page, products page, category/brand pages and search results
  * all use the same markup, and so does the "recommended items" carousel, so one component
@@ -102,6 +104,28 @@ class ProductGrid {
     const card = this.cards.nth(index);
     const info = card.locator('.productinfo');
     const product = {
+      name: (await info.locator('p').innerText()).trim(),
+      price: (await info.getByRole('heading').innerText()).trim(),
+    };
+    await this.addCardToCart(card);
+    return product;
+  }
+
+  /**
+   * Adds whichever product is showing first right now. Meant for the recommended carousel, which
+   * rotates by itself: Bootstrap pauses it while the mouse is over it, so we hover the carousel
+   * before picking a card, otherwise the card can slide away between finding it and clicking.
+   * The id comes back too because the carousel prints the price where the name should be for
+   * at least one product, so the card's text can't be trusted to find the item in the cart.
+   * @returns {Promise<AddedProduct>}
+   */
+  async addFirstVisibleProductToCart() {
+    await this.root.scrollIntoViewIfNeeded();
+    await this.root.hover();
+    const card = this.cards.filter({ visible: true }).first();
+    const info = card.locator('.productinfo');
+    const product = {
+      id: Number(await card.locator('[data-product-id]').getAttribute('data-product-id')),
       name: (await info.locator('p').innerText()).trim(),
       price: (await info.getByRole('heading').innerText()).trim(),
     };

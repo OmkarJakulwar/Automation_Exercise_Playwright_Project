@@ -114,6 +114,12 @@ The full script list lives in `package.json` and the README.
 - Category headings' accessible names start with an icon glyph (" Women"), so match with a regex.
 - Product search matches name OR category, so results don't always contain the search term.
 - The country dropdown only has 7 values - `COUNTRIES` in `dataFactory.js`.
+- The recommended carousel rotates on its own (hover pauses it) and shows "Rs. 1000" as the name of
+  product 3. Find carousel items in the cart by product id, not by the card text.
+- Some text is uppercased with CSS (brand sidebar, headings). `innerText` returns the uppercased
+  version; use `textContent` / `toHaveText` when comparing with data.
+- TC18's official text clicks "Dress" but expects "WOMEN - TOPS PRODUCTS". We check the heading
+  of whatever we clicked.
 
 ## Commenting style
 

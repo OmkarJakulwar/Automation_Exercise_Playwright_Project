@@ -1,7 +1,15 @@
 {
   "cartPair": [
-    { "id": 1, "name": "Blue Top", "price": 500 },
-    { "id": 2, "name": "Men Tshirt", "price": 400 }
+    {
+      "id": 1,
+      "name": "Blue Top",
+      "price": 500
+    },
+    {
+      "id": 2,
+      "name": "Men Tshirt",
+      "price": 400
+    }
   ],
   "detailCheck": {
     "id": 1,
@@ -13,13 +21,41 @@
     "brand": "Polo"
   },
   "categories": [
-    { "parent": "Women", "sub": "Dress", "heading": "Women - Dress Products" },
-    { "parent": "Women", "sub": "Tops", "heading": "Women - Tops Products" },
-    { "parent": "Women", "sub": "Saree", "heading": "Women - Saree Products" },
-    { "parent": "Men", "sub": "Tshirts", "heading": "Men - Tshirts Products" },
-    { "parent": "Men", "sub": "Jeans", "heading": "Men - Jeans Products" },
-    { "parent": "Kids", "sub": "Dress", "heading": "Kids - Dress Products" },
-    { "parent": "Kids", "sub": "Tops & Shirts", "heading": "Kids - Tops & Shirts Products" }
+    {
+      "parent": "Women",
+      "sub": "Dress",
+      "heading": "Women - Dress Products"
+    },
+    {
+      "parent": "Women",
+      "sub": "Tops",
+      "heading": "Women - Tops Products"
+    },
+    {
+      "parent": "Women",
+      "sub": "Saree",
+      "heading": "Women - Saree Products"
+    },
+    {
+      "parent": "Men",
+      "sub": "Tshirts",
+      "heading": "Men - Tshirts Products"
+    },
+    {
+      "parent": "Men",
+      "sub": "Jeans",
+      "heading": "Men - Jeans Products"
+    },
+    {
+      "parent": "Kids",
+      "sub": "Dress",
+      "heading": "Kids - Dress Products"
+    },
+    {
+      "parent": "Kids",
+      "sub": "Tops & Shirts",
+      "heading": "Kids - Tops & Shirts Products"
+    }
   ],
   "brands": [
     "Polo",
@@ -30,5 +66,10 @@
     "Allen Solly Junior",
     "Kookie Kids",
     "Biba"
-  ]
+  ],
+  "quantityCheck": {
+    "name": "Men Tshirt",
+    "quantity": 4
+  },
+  "searchThenLogin": "jeans"
 }
