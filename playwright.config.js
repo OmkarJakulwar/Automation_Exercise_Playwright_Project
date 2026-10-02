@@ -16,6 +16,9 @@ const chromiumOnly = ['**/visual/**', '**/a11y/**'];
 
 module.exports = defineConfig({
   testDir: './tests',
+  // Fails fast if the site is down, and sweeps up test accounts a crashed worker left behind.
+  globalSetup: require.resolve('./src/global/globalSetup'),
+  globalTeardown: require.resolve('./src/global/globalTeardown'),
   outputDir: './test-results',
 
   // The site is a shared public demo and can be slow, so give tests more room than the default.

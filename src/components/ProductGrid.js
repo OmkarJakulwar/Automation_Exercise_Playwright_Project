@@ -40,6 +40,15 @@ class ProductGrid {
   }
 
   /**
+   * The price shown on a product's card.
+   * @param {string} name
+   * @returns {import('@playwright/test').Locator}
+   */
+  price(name) {
+    return this.card(name).locator('.productinfo').getByRole('heading');
+  }
+
+  /**
    * Walks every card and reads its name and price. Only cards that are actually rendered
    * count - the recommended carousel keeps hidden slides in the DOM.
    * @returns {Promise<ProductCardInfo[]>}
@@ -66,6 +75,23 @@ class ProductGrid {
   }
 
   /**
+   * Hovers a card and clicks its "Add to cart" button, without waiting for anything after.
+   * Most tests want addCardToCart(); this is for the ones that mock the request to fail.
+   * @param {import('@playwright/test').Locator} card
+   * @returns {Promise<void>}
+   */
+  async clickAddToCart(card) {
+    await card.scrollIntoViewIfNeeded();
+    await card.hover();
+    // The hover overlay only exists on listing grids; the recommended carousel has no overlay,
+    // so fall back to the button inside the card itself.
+    const overlayButton = card.locator('.product-overlay').getByText('Add to cart');
+    const button =
+      (await overlayButton.count()) > 0 ? overlayButton : card.getByText('Add to cart');
+    await button.click();
+  }
+
+  /**
    * Hovers a card and clicks the "Add to cart" button in its overlay, then waits for the
    * "Added!" popup. We wait on the add_to_cart request too, because the popup can show up
    * a moment before the server has stored the item.
@@ -73,15 +99,25 @@ class ProductGrid {
    * @returns {Promise<void>}
    */
   async addCardToCart(card) {
-    await card.scrollIntoViewIfNeeded();
-    await card.hover();
-    // The hover overlay only exists on listing grids; the recommended carousel has no overlay,
-    // so fall back to the button inside the card itself.
-    const overlayButton = card.locator('.product-overlay').getByText('Add to cart');
-    const button = (await overlayButton.count()) > 0 ? overlayButton : card.getByText('Add to cart');
     await Promise.all([
       this.page.waitForResponse((r) => r.url().includes('/add_to_cart/') && r.ok()),
-      button.click(),
+      this.clickAddToCart(card),
+    ]);
+    await this.cartModal.title.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Touch version of adding to cart. Phones have no hover, so we tap the button in the card
+   * body rather than the one in the hover overlay.
+   * @param {string} name
+   * @returns {Promise<void>}
+   */
+  async tapAddToCart(name) {
+    const button = this.card(name).locator('.productinfo').getByText('Add to cart');
+    await button.scrollIntoViewIfNeeded();
+    await Promise.all([
+      this.page.waitForResponse((r) => r.url().includes('/add_to_cart/') && r.ok()),
+      button.tap(),
     ]);
     await this.cartModal.title.waitFor({ state: 'visible' });
   }
@@ -139,9 +175,28 @@ class ProductGrid {
    * @returns {Promise<void>}
    */
   async viewProduct(nameOrIndex) {
-    const card = typeof nameOrIndex === 'number' ? this.cards.nth(nameOrIndex) : this.card(nameOrIndex);
+    const card =
+      typeof nameOrIndex === 'number' ? this.cards.nth(nameOrIndex) : this.card(nameOrIndex);
     await card.getByRole('link', { name: 'View Product' }).click();
     await this.page.waitForURL('**/product_details/**');
+  }
+
+  /**
+   * Ctrl/Cmd-clicks "View Product" so the detail page opens in a new tab, like a shopper
+   * comparing products would. The current page stays where it is.
+   * @param {string} name
+   * @returns {Promise<import('@playwright/test').Page>} the new tab, loaded
+   */
+  async openProductInNewTab(name) {
+    const link = this.card(name).getByRole('link', { name: 'View Product' });
+    const [newTab] = await Promise.all([
+      this.page.context().waitForEvent('page'),
+      link.click({ modifiers: ['ControlOrMeta'] }),
+    ]);
+    // Not waitForLoadState: the new tab starts on about:blank, which counts as already loaded,
+    // so that returns before the product page has even started. Wait for the real URL instead.
+    await newTab.waitForURL('**/product_details/**');
+    return newTab;
   }
 }
 

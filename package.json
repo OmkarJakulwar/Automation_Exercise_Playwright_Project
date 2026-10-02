@@ -23,6 +23,7 @@
     "allure:open": "allure open allure-report",
     "update:snapshots": "playwright test --grep @visual --project=chromium --update-snapshots",
     "update:snapshots:docker": "docker run --rm --ipc=host -v \"$PWD\":/work -v /work/node_modules -w /work mcr.microsoft.com/playwright:v1.63.0-noble /bin/bash -c \"npm ci && npx playwright test --grep @visual --project=chromium --update-snapshots\"",
+    "har:update": "UPDATE_HAR=1 playwright test tests/mocking/har.spec.js --project=chromium",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

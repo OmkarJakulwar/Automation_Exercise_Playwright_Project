@@ -4,6 +4,7 @@ const path = require('node:path');
 const { test: setup, expect } = require('../src/fixtures');
 const { AUTH_STATE_FILE, AUTH_USER_FILE } = require('../config/constants');
 const { buildUser } = require('../src/utils/dataFactory');
+const { recordCreated } = require('../src/utils/accountLedger');
 
 // Runs once per `playwright test` run, before the browser projects. It makes an account through
 // the API (quick) and logs in through the real form (so the cookies are exactly what a user gets),
@@ -16,6 +17,7 @@ setup('create a user and save the logged-in session', async ({ accountApi, login
   const user = buildUser();
   const created = await accountApi.createAccount(user);
   expect(created.responseCode, created.message).toBe(201);
+  recordCreated(user);
 
   await loginSignupPage.open();
   await loginSignupPage.login(user.email, user.password);

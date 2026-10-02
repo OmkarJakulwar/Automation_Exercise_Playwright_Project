@@ -1,14 +1,15 @@
 // @ts-check
 const { test: base } = require('@playwright/test');
 const { expect } = require('./matchers');
-const { getEnvironment } = require('../../config/environments');
 const fs = require('node:fs');
+const { getEnvironment } = require('../../config/environments');
 const { BLOCKED_HOSTS, PRODUCT_IMAGE_URL, AUTH_USER_FILE } = require('../../config/constants');
 const { ApiClient } = require('../api/ApiClient');
 const { AccountApi } = require('../api/AccountApi');
 const { ProductsApi } = require('../api/ProductsApi');
 const { BrandsApi } = require('../api/BrandsApi');
 const { buildUser } = require('../utils/dataFactory');
+const { recordCreated, recordDeleted } = require('../utils/accountLedger');
 const { createLogger } = require('../utils/logger');
 const { HomePage } = require('../pages/HomePage');
 const { LoginSignupPage } = require('../pages/LoginSignupPage');
@@ -31,6 +32,35 @@ const PLACEHOLDER_PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
   'base64',
 );
+
+/**
+ * Aborts requests to ad / analytics hosts on a context.
+ * @param {import('@playwright/test').BrowserContext} context
+ * @param {string[]} hosts
+ * @returns {Promise<() => number>} how many requests have been blocked so far
+ */
+async function blockAds(context, hosts) {
+  let blocked = 0;
+  await context.route(
+    (url) => hosts.some((host) => url.hostname.endsWith(host)),
+    (route) => {
+      blocked += 1;
+      return route.abort('blockedbyclient');
+    },
+  );
+  return () => blocked;
+}
+
+/**
+ * Answers product image requests with a 1x1 PNG. See the productImages fixture for why.
+ * @param {import('@playwright/test').BrowserContext} context
+ * @returns {Promise<void>}
+ */
+async function stubImages(context) {
+  await context.route(PRODUCT_IMAGE_URL, (route) =>
+    route.fulfill({ contentType: 'image/png', body: PLACEHOLDER_PNG }),
+  );
+}
 
 /** @typedef {import('../utils/dataFactory').User} User */
 /** @typedef {{ id: number, name: string, price: string, brand: string, category: any }} CatalogProduct */
@@ -70,6 +100,9 @@ const PLACEHOLDER_PNG = Buffer.from(
  * @property {PaymentPage} paymentPage
  * @property {ContactUsPage} contactUsPage
  * @property {TestCasesPage} testCasesPage
+ * @property {() => Promise<import('@playwright/test').BrowserContext>} openContext - opens another
+ *   browser context (a second, separate shopper) with the same baseURL, ad blocking and image
+ *   stubbing as the default one. Closed automatically after the test.
  * @property {User} authUser - the account behind the saved login from tests/auth.setup.js. Pair it
  *   with test.use({ storageState: AUTH_STATE_FILE }).
  */
@@ -85,9 +118,10 @@ const PLACEHOLDER_PNG = Buffer.from(
  */
 async function deleteQuietly(accountApi, user) {
   const { responseCode, message } = await accountApi.deleteAccount(user.email, user.password);
-  if (responseCode === 200) {
-    log.debug(`cleaned up ${user.email}`);
-  } else if (responseCode !== 404) {
+  if (responseCode === 200 || responseCode === 404) {
+    recordDeleted(user.email);
+    if (responseCode === 200) log.debug(`cleaned up ${user.email}`);
+  } else {
     log.warn(`clean-up for ${user.email} returned ${responseCode}: ${message}`);
   }
 }
@@ -113,12 +147,15 @@ const apiTest = base.extend(
       if (created.responseCode !== 201) {
         throw new Error(`Could not create test user: ${created.responseCode} ${created.message}`);
       }
+      recordCreated(user);
       await use(user);
       await deleteQuietly(accountApi, user);
     },
 
     newUser: async ({ accountApi }, use) => {
       const user = buildUser();
+      // Recorded up front: the test may register it through the UI and then get killed.
+      recordCreated(user);
       await use(user);
       await deleteQuietly(accountApi, user);
     },
@@ -148,16 +185,9 @@ const test = apiTest.extend(
     // popups and new tabs are covered too.
     adBlocker: [
       async ({ context, adBlockHosts }, use) => {
-        let blocked = 0;
-        await context.route(
-          (url) => adBlockHosts.some((host) => url.hostname.endsWith(host)),
-          (route) => {
-            blocked += 1;
-            return route.abort('blockedbyclient');
-          },
-        );
+        const blocked = await blockAds(context, adBlockHosts);
         await use();
-        log.debug(`ad blocker aborted ${blocked} requests`);
+        log.debug(`ad blocker aborted ${blocked()} requests`);
       },
       { auto: true },
     ],
@@ -171,11 +201,7 @@ const test = apiTest.extend(
     // functional tests look at the pictures themselves.
     productImages: [
       async ({ context, stubProductImages }, use) => {
-        if (stubProductImages) {
-          await context.route(PRODUCT_IMAGE_URL, (route) =>
-            route.fulfill({ contentType: 'image/png', body: PLACEHOLDER_PNG }),
-          );
-        }
+        if (stubProductImages) await stubImages(context);
         await use();
       },
       { auto: true },
@@ -207,10 +233,27 @@ const test = apiTest.extend(
     contactUsPage: async ({ page }, use) => use(new ContactUsPage(page)),
     testCasesPage: async ({ page }, use) => use(new TestCasesPage(page)),
 
+    // browser.newContext() doesn't pick up the project's `use` settings or our auto fixtures, so
+    // this hands out contexts that behave like the default one. Used for "two users at once" tests.
+    openContext: async ({ browser, baseURL, adBlockHosts, stubProductImages }, use) => {
+      /** @type {import('@playwright/test').BrowserContext[]} */
+      const opened = [];
+      await use(async () => {
+        const context = await browser.newContext({ baseURL });
+        await blockAds(context, adBlockHosts);
+        if (stubProductImages) await stubImages(context);
+        opened.push(context);
+        return context;
+      });
+      await Promise.all(opened.map((context) => context.close()));
+    },
+
     // eslint-disable-next-line no-empty-pattern
     authUser: async ({}, use) => {
       if (!fs.existsSync(AUTH_USER_FILE)) {
-        throw new Error(`${AUTH_USER_FILE} is missing - run with the setup project (don't pass --no-deps)`);
+        throw new Error(
+          `${AUTH_USER_FILE} is missing - run with the setup project (don't pass --no-deps)`,
+        );
       }
       await use(JSON.parse(fs.readFileSync(AUTH_USER_FILE, 'utf8')));
     },

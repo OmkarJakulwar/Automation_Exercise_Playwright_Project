@@ -67,12 +67,13 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 - [x] TC24 Download invoice
 
 ## Phase 7 - Advanced features
-- [ ] Hybrid tests (API + UI)
-- [ ] Network mocking, route.fulfill/continue/abort, HAR record + replay
-- [ ] Multiple contexts, popups/new tab
-- [ ] Mobile project tests, geolocation/locale/timezone
-- [ ] Custom matcher, expect.poll, toPass
-- [ ] Global setup / teardown
+- [x] Hybrid tests (API + UI): API user → UI login, UI signup → API details, API rename → UI header, API delete → UI login refused, product pages vs catalogue
+- [x] Network mocking: route.fulfill (500 on add-to-cart), route.fetch + patched HTML, route.continue (rewritten search), route.abort (images/fonts), request inspection, offline mode
+- [x] HAR record + replay (`npm run har:update`, `test-data/har/products.har`)
+- [x] Multiple contexts (`openContext` fixture, two shoppers), new tab via Ctrl/Cmd-click
+- [x] Mobile project tests (layout, taps), geolocation / locale / timezone emulation
+- [x] Custom matcher `toHavePrice`, expect.poll, toPass
+- [x] Global setup (site health check) / teardown (sweeps leftover accounts from the ledger)
 
 ## Phase 8 - Visual & accessibility
 - [ ] toHaveScreenshot: home, product detail, cart

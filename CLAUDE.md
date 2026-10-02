@@ -25,12 +25,15 @@ src/components/          UI parts shared by many pages (header, footer, sidebars
                          product grid, "Added!" cart modal)
 src/api/                 ApiClient + one class per API area
 src/fixtures/index.js    custom `test` and `expect` - always import from here in specs
-src/utils/               dataFactory (faker), fileHelper, apiResponse, logger
+src/utils/               dataFactory (faker), fileHelper, apiResponse, logger, price,
+                         accountLedger (tracks created accounts for global teardown)
+src/global/              globalSetup (site health check) and globalTeardown (account sweep)
 src/schemas/             JSON schemas for API responses (ajv) - use expect(body).toMatchSchema('name')
-test-data/               static JSON/CSV data + upload files
+test-data/               static JSON/CSV data, upload files, recorded HAR (test-data/har)
 tests/auth.setup.js      creates a user, logs in once, saves storageState
 tests/auth.teardown.js   deletes that user once all dependent projects finish
 tests/ui/<area>/         official UI test cases, grouped by feature
+tests/ui/sessions/       new tab and multi-context tests
 tests/api/               the 14 API tests
 tests/hybrid/            API setup + UI verification
 tests/visual/            toHaveScreenshot tests
@@ -78,6 +81,12 @@ The full script list lives in `package.json` and the README.
   `adBlockHosts` (option - override with `test.use()`), `stubProductImages` (option, default on),
   `authUser` (the account behind the saved login - pair with
   `test.use({ storageState: AUTH_STATE_FILE })`).
+- `openContext()` gives you another browser context set up like the default one (baseURL, ad
+  blocking, image stub). Plain `browser.newContext()` skips all of that.
+- Custom matchers: `toMatchSchema(name)` for API bodies, `toHavePrice(n)` for price locators.
+- Accounts created outside the `testUser` / `newUser` fixtures must go through `recordCreated()` /
+  `recordDeleted()` in `src/utils/accountLedger.js`, so global teardown can sweep leftovers.
+- Re-record the HAR with `npm run har:update` if the products page changes.
 - Saved login is for read-only tests only. Anything that touches the cart uses its own
   `testUser` / `newUser` (see the cart quirk below).
 - Steps shared by several specs in one folder go in a plain `steps.js` next to them (see
@@ -125,6 +134,11 @@ The full script list lives in `package.json` and the README.
 - After a successful login, use `loginAndWaitForHome()` if the next step clicks something on the
   home page - add-to-cart clicks before `load` silently do nothing.
 - The invoice is a text file: "Hi <name>, Your total purchase amount is <total>. Thank you".
+- A tab opened with Ctrl/Cmd-click starts on about:blank, so `waitForLoadState` returns at once.
+  Wait for the real URL (`waitForURL`) instead - `ProductGrid.openProductInNewTab` does.
+- Engine differences we hit: Firefox asks for zstd and `route.fetch()` returns it undecoded (set
+  `accept-encoding`); WebKit hides Accept-Language from `request.allHeaders()`; Chromium reports
+  Asia/Kolkata as "Asia/Calcutta".
 - The country dropdown only has 7 values - `COUNTRIES` in `dataFactory.js`.
 - The recommended carousel rotates on its own (hover pauses it) and shows "Rs. 1000" as the name of
   product 3. Find carousel items in the cart by product id, not by the card text.
