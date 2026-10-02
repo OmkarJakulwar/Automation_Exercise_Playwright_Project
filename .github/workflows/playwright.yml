@@ -1,27 +1,196 @@
 name: Playwright Tests
+
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
+  workflow_dispatch:
+
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # npm ci runs `prepare`, which would install git hooks we don't want on a runner.
+  HUSKY: 0
+
 jobs:
-  test:
-    timeout-minutes: 60
+  # Cheap checks first, so a lint error fails in a minute instead of after the whole suite.
+  lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-      - name: Install dependencies
-        run: npm ci
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: Run Playwright tests
-        run: npx playwright test
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+
+  # Everything except the screenshot tests, split four ways. Every shard runs its own `setup`
+  # project, so each one logs in with its own throwaway account.
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Run tests
+        run: npx playwright test --grep-invert @visual --shard=${{ matrix.shard }}/4
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 3
+      - name: Upload Allure results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ matrix.shard }}
+          path: allure-results
+          retention-days: 3
+
+  # Screenshots depend on fonts and rendering, so they run inside the official Playwright image -
+  # the same one `npm run update:snapshots:docker` and update-snapshots.yml use to make baselines.
+  visual:
+    needs: lint
+    # A [update-snapshots] commit is about to get new baselines from update-snapshots.yml, so
+    # comparing against the old ones here would only fail.
+    if: ${{ !contains(github.event.head_commit.message, '[update-snapshots]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      # Keep the tag in step with @playwright/test in package-lock.json (and in package.json's
+      # update:snapshots:docker script), or the baselines won't match.
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run visual tests
+        run: npx playwright test --grep @visual --project=chromium
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-visual
+          path: blob-report
+          retention-days: 3
+      - name: Upload Allure results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-visual
+          path: allure-results
+          retention-days: 3
+      # The diff images are in the HTML report too, but this is quicker to grab when a baseline
+      # needs a look.
+      - name: Upload screenshot diffs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: test-results
+          retention-days: 7
+
+  # Stitches the shards back into one HTML report, one JUnit file and one Allure report.
+  report:
+    needs: [test, visual]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: blob-report-*
+          path: all-blob-reports
+          merge-multiple: true
+      - name: Merge into HTML and JUnit
+        run: npx playwright merge-reports --config merge.config.js ./all-blob-reports
+      - name: Download Allure results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: allure-results-*
+          path: allure-results
+          merge-multiple: true
+      # Allure builds its trend charts from the previous report's history folder. We pull it from
+      # the live Pages site; on the very first run there's nothing there, which is fine.
+      - name: Fetch Allure history from the last published report
+        run: |
+          mkdir -p allure-results/history
+          base="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/history"
+          for f in history.json history-trend.json duration-trend.json categories-trend.json retry-trend.json; do
+            curl -sfL "$base/$f" -o "allure-results/history/$f" || true
+          done
+      - name: Build Allure report
+        run: npm run allure:generate
+      - name: Assemble the Pages site
+        run: |
+          mkdir -p site
+          cp -r playwright-report site/playwright-report
+          cp -r allure-report site/allure-report
+          cp .github/pages/index.html site/index.html
+      - name: Upload merged reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            site
+            test-results/junit.xml
+          retention-days: 14
+      - name: Upload Pages artifact
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # Publishes the reports from main only. Pull requests still get them as a downloadable artifact.
+  deploy:
+    needs: report
+    if: ${{ !cancelled() && needs.report.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

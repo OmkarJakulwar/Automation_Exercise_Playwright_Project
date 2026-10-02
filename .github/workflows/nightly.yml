@@ -1,0 +1,117 @@
+name: Nightly regression
+
+# The full suite once a night, one job per browser and no sharding, so a red job points straight
+# at the browser that broke. Also catches the site changing under us between pushes.
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+    inputs:
+      env:
+        description: Environment to run against
+        type: choice
+        options: [prod, staging, qa]
+        default: prod
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: 0
+  ENV: ${{ inputs.env || 'prod' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, webkit, mobile-chrome, mobile-safari, api]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install browsers
+        if: ${{ matrix.project != 'api' }}
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Run tests
+        run: npx playwright test --project=${{ matrix.project }} --grep-invert @visual
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.project }}
+          path: blob-report
+          retention-days: 7
+
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      # Same tag as the visual job in playwright.yml.
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run visual tests
+        run: npx playwright test --grep @visual --project=chromium
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-visual
+          path: blob-report
+          retention-days: 7
+
+  # Smoke tests five times over with retries off. A test that passes on a retry in the normal
+  # pipeline shows up here as a plain failure, so flakiness doesn't hide.
+  flaky-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run smoke tests five times each
+        run: npx playwright test --grep @smoke --project=chromium --project=api --repeat-each=5 --retries=0 --reporter=dot,github
+
+  report:
+    needs: [test, visual]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: blob-report-*
+          path: all-blob-reports
+          merge-multiple: true
+      - name: Merge into HTML and JUnit
+        run: npx playwright merge-reports --config merge.config.js ./all-blob-reports
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nightly-report
+          path: |
+            playwright-report
+            test-results/junit.xml
+          retention-days: 14

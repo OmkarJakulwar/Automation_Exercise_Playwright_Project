@@ -12,6 +12,14 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["config", "src", "tests", "eslint-rules", "playwright.config.js", "eslint.config.js"],
+  "include": [
+    "config",
+    "src",
+    "tests",
+    "eslint-rules",
+    "playwright.config.js",
+    "eslint.config.js",
+    "merge.config.js"
+  ],
   "exclude": ["node_modules", "test-results", "playwright-report"]
 }

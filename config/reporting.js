@@ -74,4 +74,32 @@ function allureOptions(env) {
   };
 }
 
-module.exports = { allureOptions, ALLURE_RESULTS_DIR, ALLURE_CATEGORIES };
+/**
+ * HTML report settings, shared by playwright.config.js and merge.config.js.
+ * @param {import('./environments').Environment} env
+ * @returns {import('@playwright/test').ReporterDescription}
+ */
+const htmlReporter = (env) => [
+  'html',
+  { open: 'never', outputFolder: 'playwright-report', title: `Automation Exercise (${env.name})` },
+];
+
+// The same test runs once per browser, so without the project in the name JUnit shows several
+// identical "TC01 - Register User" rows and you can't tell which browser failed.
+/** @type {import('@playwright/test').ReporterDescription} */
+const junitReporter = [
+  'junit',
+  {
+    outputFile: 'test-results/junit.xml',
+    includeProjectInTestName: true,
+    stripANSIControlSequences: true,
+  },
+];
+
+module.exports = {
+  allureOptions,
+  htmlReporter,
+  junitReporter,
+  ALLURE_RESULTS_DIR,
+  ALLURE_CATEGORIES,
+};

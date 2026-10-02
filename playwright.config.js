@@ -1,7 +1,7 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
 const { getEnvironment } = require('./config/environments');
-const { allureOptions } = require('./config/reporting');
+const { allureOptions, htmlReporter, junitReporter } = require('./config/reporting');
 
 const env = getEnvironment();
 const isCI = !!process.env.CI;
@@ -14,6 +14,20 @@ const desktopIgnore = ['**/api/**', '**/mobile/**', '**/*.setup.js', '**/*.teard
 // Visual baselines and axe results don't change between engines in a way we care about, so we
 // only keep them on Chromium. That keeps the snapshot folder to one set of images.
 const chromiumOnly = ['**/visual/**', '**/a11y/**'];
+
+/** @type {import('@playwright/test').ReporterDescription[]} */
+const localReporters = [
+  ['list'],
+  htmlReporter(env),
+  junitReporter,
+  ['allure-playwright', allureOptions(env)],
+];
+
+// CI runs in shards, so each shard writes a blob that the merge job turns into one HTML + JUnit
+// report (see merge.config.js). Allure results are plain files, so those just get copied together.
+// `github` turns failures into annotations on the commit.
+/** @type {import('@playwright/test').ReporterDescription[]} */
+const ciReporters = [['dot'], ['github'], ['blob'], ['allure-playwright', allureOptions(env)]];
 
 module.exports = defineConfig({
   testDir: './tests',
@@ -39,29 +53,7 @@ module.exports = defineConfig({
   // Too many parallel workers against a public site gets us rate limited, so CI defaults to 2.
   workers: process.env.WORKERS ? Number(process.env.WORKERS) : isCI ? 2 : undefined,
 
-  // CI overrides this with --reporter=blob for sharding; these are for normal runs.
-  reporter: [
-    [isCI ? 'dot' : 'list'],
-    [
-      'html',
-      {
-        open: 'never',
-        outputFolder: 'playwright-report',
-        title: `Automation Exercise (${env.name})`,
-      },
-    ],
-    // The same test runs once per browser, so without the project in the name CI shows several
-    // identical "TC01 - Register User" rows and you can't tell which browser failed.
-    [
-      'junit',
-      {
-        outputFile: 'test-results/junit.xml',
-        includeProjectInTestName: true,
-        stripANSIControlSequences: true,
-      },
-    ],
-    ['allure-playwright', allureOptions(env)],
-  ],
+  reporter: isCI ? ciReporters : localReporters,
 
   use: {
     baseURL: env.baseURL,

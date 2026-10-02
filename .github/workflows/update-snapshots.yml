@@ -1,0 +1,47 @@
+name: Update visual baselines
+
+# Makes the Linux screenshots CI compares against, inside the same Playwright image the visual
+# job uses, and commits them back. Run it from the Actions tab, or push a commit whose message
+# contains [update-snapshots].
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+env:
+  HUSKY: 0
+
+jobs:
+  update:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[update-snapshots]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      # Same tag as the visual job in playwright.yml.
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Write new baselines
+        run: npx playwright test --grep @visual --project=chromium --update-snapshots
+      - name: Commit them if anything changed
+        run: |
+          # The checkout belongs to another user inside the container, and git refuses to touch it.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/visual
+          if git diff --cached --quiet; then
+            echo "Baselines already up to date."
+          else
+            git commit -m "test: update linux visual baselines"
+            git push
+          fi
