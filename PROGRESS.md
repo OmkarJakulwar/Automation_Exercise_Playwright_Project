@@ -108,10 +108,10 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 
 ## Phase 12 - CI/CD
 
-- [ ] `playwright.yml` (lint, sharded tests, merge reports, deploy to Pages)
-- [ ] `nightly.yml`
-- [ ] Docker job for visual tests
-- [ ] Pipeline green on main
+- [x] `playwright.yml` (lint, 4 shards, merge reports, Allure with history, deploy to Pages): https://omkarjakulwar.github.io/Automation_Exercise_Playwright_Project/
+- [x] `nightly.yml` (one job per project, visual, smoke x5 with retries off) - first scheduled run still to come
+- [x] Docker job for visual tests, `update-snapshots.yml` commits the Linux baselines
+- [x] Pipeline green on main (`f726d52`: 237/237, no flaky). Fixed on the way: WebKit on Linux opens the invoice as a page instead of downloading it
 
 ## Phase 13 - Documentation
 
