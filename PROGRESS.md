@@ -103,7 +103,8 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 
 ## Phase 11 - GitHub repository
 
-- [ ] Public repo via `gh`, description and topics
+- [x] Public repo: https://github.com/OmkarJakulwar/Automation_Exercise_Playwright_Project (created on GitHub, `gh` isn't installed), `main` pushed over HTTPS
+- [ ] Description and topics - set by hand in the repo's About box (needs `gh` or the web UI)
 
 ## Phase 12 - CI/CD
 
