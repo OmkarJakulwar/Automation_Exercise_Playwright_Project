@@ -146,9 +146,9 @@ test.describe('Place order', () => {
 
       await test.step("Click 'Download Invoice' and check the invoice was downloaded", async () => {
         const savedTo = downloadPath(testInfo, INVOICE_FILE_NAME);
-        const download = await paymentPage.downloadInvoice(savedTo);
+        const { fileName } = await paymentPage.downloadInvoice(savedTo);
 
-        expect(download.suggestedFilename()).toBe(INVOICE_FILE_NAME);
+        expect(fileName).toBe(INVOICE_FILE_NAME);
         expect(fs.readFileSync(savedTo, 'utf8').trim()).toBe(
           invoiceText(newUser.name, EXPECTED_TOTAL),
         );

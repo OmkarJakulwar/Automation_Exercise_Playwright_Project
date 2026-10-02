@@ -1,4 +1,6 @@
 // @ts-check
+const fs = require('node:fs');
+const path = require('node:path');
 const { BasePage } = require('./BasePage');
 const { MESSAGES } = require('../../config/constants');
 
@@ -50,15 +52,33 @@ class PaymentPage extends BasePage {
   /**
    * Clicks "Download Invoice" and saves the file.
    * @param {string} savePath - where to put the file
-   * @returns {Promise<import('@playwright/test').Download>}
+   * @returns {Promise<{ fileName: string }>} the file name the server suggested
    */
   async downloadInvoice(savePath) {
-    const [download] = await Promise.all([
-      this.page.waitForEvent('download'),
-      this.downloadInvoiceButton.click(),
-    ]);
-    await download.saveAs(savePath);
-    return download;
+    const response = this.page.waitForResponse((r) => r.url().includes('/download_invoice/'));
+    const download = this.page.waitForEvent('download');
+    // WebKit on Linux ignores `Content-Disposition: attachment` for text/plain and shows the
+    // invoice as a page, so no download event ever fires there. Elsewhere the download wins the
+    // race. Some engines also cancel the navigation when the download starts, which fails the URL
+    // wait - in that case we just keep waiting for the download.
+    const shownInline = this.page.waitForURL('**/download_invoice/**').then(
+      () => null,
+      () => download,
+    );
+    await this.downloadInvoiceButton.click();
+
+    const file = await Promise.race([download, shownInline]);
+    if (file) {
+      await file.saveAs(savePath);
+      return { fileName: file.suggestedFilename() };
+    }
+    // Never coming now; stop it turning into an unhandled rejection when it times out.
+    download.catch(() => {});
+    const res = await response;
+    const disposition = (await res.headerValue('content-disposition')) ?? '';
+    fs.mkdirSync(path.dirname(savePath), { recursive: true });
+    fs.writeFileSync(savePath, await res.text());
+    return { fileName: disposition.match(/filename="?([^";]+)"?/)?.[1] ?? '' };
   }
 
   /**

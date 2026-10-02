@@ -147,7 +147,8 @@ The full script list lives in `package.json` and the README.
   Wait for the real URL (`waitForURL`) instead - `ProductGrid.openProductInNewTab` does.
 - Engine differences we hit: Firefox asks for zstd and `route.fetch()` returns it undecoded (set
   `accept-encoding`); WebKit hides Accept-Language from `request.allHeaders()`; Chromium reports
-  Asia/Kolkata as "Asia/Calcutta"; Firefox caps how far one `mouse.wheel()` call scrolls.
+  Asia/Kolkata as "Asia/Calcutta"; Firefox caps how far one `mouse.wheel()` call scrolls; WebKit on Linux shows the
+  text/plain invoice as a page instead of downloading it (`PaymentPage.downloadInvoice` handles both).
 - The country dropdown only has 7 values - `COUNTRIES` in `dataFactory.js`.
 - The recommended carousel rotates on its own (hover pauses it) and shows "Rs. 1000" as the name of
   product 3. Find carousel items in the cart by product id, not by the card text.
@@ -155,6 +156,16 @@ The full script list lives in `package.json` and the README.
   version; use `textContent` / `toHaveText` when comparing with data.
 - TC18's official text clicks "Dress" but expects "WOMEN - TOPS PRODUCTS". We check the heading
   of whatever we clicked.
+
+## CI
+
+- `playwright.yml`: lint/typecheck, then 4 shards (all browsers, no `@visual`) plus a visual job in
+  the `mcr.microsoft.com/playwright` image. A report job merges the blobs (`merge.config.js`) and
+  Allure results; on `main` they're published to GitHub Pages.
+- `nightly.yml`: one job per project, the visual job, and smoke x5 with retries off to catch flakes.
+- Visual baselines: CI compares against the `-linux` PNGs. To refresh them, run
+  `update-snapshots.yml` from the Actions tab or put `[update-snapshots]` in a commit message; the
+  bot commits the new images. The Docker image tag must match `@playwright/test`.
 
 ## Commenting style
 
