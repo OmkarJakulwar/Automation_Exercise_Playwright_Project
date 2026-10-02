@@ -76,8 +76,8 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 - [x] Global setup (site health check) / teardown (sweeps leftover accounts from the ledger)
 
 ## Phase 8 - Visual & accessibility
-- [ ] toHaveScreenshot: home, product detail, cart
-- [ ] axe scans on key pages
+- [x] toHaveScreenshot: home (first screen, carousel masked), product detail, cart - real images, darwin baselines (Linux ones come with the Phase 12 Docker job)
+- [x] axe scans on 7 pages + header and login/signup forms, with a known-issues list per scan (`test-data/a11y.json`), `makeAxeBuilder` fixture
 
 ## Phase 9 - Code quality
 - [ ] ESLint flat config + playwright plugin + custom rules

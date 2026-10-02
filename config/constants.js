@@ -73,6 +73,9 @@ const PRODUCT_IMAGE_URL = '**/get_product_picture/**';
 const invoiceText = (name, amount) => `Hi ${name}, Your total purchase amount is ${amount}. Thank you`;
 const INVOICE_FILE_NAME = 'invoice.txt';
 
+// axe rule sets we scan against: WCAG 2.0 and 2.1, levels A and AA.
+const WCAG_TAGS = Object.freeze(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']);
+
 // Written by tests/auth.setup.js, read by tests that reuse the saved login. The folder is
 // git-ignored: the user file holds the throwaway account's password.
 const AUTH_DIR = path.resolve(__dirname, '../playwright/.auth');
@@ -87,6 +90,7 @@ module.exports = {
   PRODUCT_IMAGE_URL,
   invoiceText,
   INVOICE_FILE_NAME,
+  WCAG_TAGS,
   AUTH_STATE_FILE,
   AUTH_USER_FILE,
 };

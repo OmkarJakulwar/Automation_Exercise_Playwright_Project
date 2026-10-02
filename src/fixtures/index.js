@@ -1,9 +1,15 @@
 // @ts-check
 const { test: base } = require('@playwright/test');
+const { AxeBuilder } = require('@axe-core/playwright');
 const { expect } = require('./matchers');
 const fs = require('node:fs');
 const { getEnvironment } = require('../../config/environments');
-const { BLOCKED_HOSTS, PRODUCT_IMAGE_URL, AUTH_USER_FILE } = require('../../config/constants');
+const {
+  BLOCKED_HOSTS,
+  PRODUCT_IMAGE_URL,
+  AUTH_USER_FILE,
+  WCAG_TAGS,
+} = require('../../config/constants');
 const { ApiClient } = require('../api/ApiClient');
 const { AccountApi } = require('../api/AccountApi');
 const { ProductsApi } = require('../api/ProductsApi');
@@ -105,6 +111,8 @@ async function stubImages(context) {
  *   stubbing as the default one. Closed automatically after the test.
  * @property {User} authUser - the account behind the saved login from tests/auth.setup.js. Pair it
  *   with test.use({ storageState: AUTH_STATE_FILE }).
+ * @property {() => AxeBuilder} makeAxeBuilder - axe scanner for the current page, preset to our
+ *   WCAG tags. Chain .include() / .exclude() / .disableRules() before .analyze().
  */
 
 /** @typedef {import('@playwright/test').PlaywrightTestArgs & import('@playwright/test').PlaywrightTestOptions} BuiltInTestArgs */
@@ -256,6 +264,13 @@ const test = apiTest.extend(
         );
       }
       await use(JSON.parse(fs.readFileSync(AUTH_USER_FILE, 'utf8')));
+    },
+
+    // A factory rather than a ready builder, so a test can run more than one scan. The ad slots
+    // stay in the DOM as empty <ins> tags even with the ad hosts blocked, and they're Google's
+    // markup, not the site's, so we leave them out.
+    makeAxeBuilder: async ({ page }, use) => {
+      await use(() => new AxeBuilder({ page }).withTags([...WCAG_TAGS]).exclude('ins.adsbygoogle'));
     },
   }),
 );

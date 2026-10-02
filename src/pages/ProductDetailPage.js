@@ -22,8 +22,9 @@ class ProductDetailPage extends BasePage {
     super(page, `/product_details/${productId}`);
     this.cartModal = new CartModal(page);
 
-    // The info panel is a plain div; the class is the only thing that scopes it.
-    this.info = page.locator('.product-information');
+    // The image + info block and the info panel are plain divs; their classes are all we have.
+    this.panel = page.locator('.product-details');
+    this.info = this.panel.locator('.product-information');
     this.name = this.info.getByRole('heading', { level: 2 });
     this.category = this.info.getByText(/^Category:/);
     this.price = this.info.getByText(/^Rs\. \d+$/);
