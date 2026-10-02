@@ -6,7 +6,15 @@ test.describe('Register user', () => {
   test(
     'TC01 - Register User',
     { tag: ['@smoke', '@regression'] },
-    async ({ page, homePage, loginSignupPage, signupPage, accountCreatedPage, accountDeletedPage, newUser }) => {
+    async ({
+      page,
+      homePage,
+      loginSignupPage,
+      signupPage,
+      accountCreatedPage,
+      accountDeletedPage,
+      newUser,
+    }) => {
       await test.step('Open the home page and check it loaded', async () => {
         await homePage.open();
         await homePage.expectLoaded();
@@ -34,7 +42,9 @@ test.describe('Register user', () => {
       await test.step('Fill address details and create the account', async () => {
         await signupPage.fillAddressInformation(newUser);
         await signupPage.submit();
-        await expect(accountCreatedPage.heading).toHaveText(MESSAGES.accountCreated, { ignoreCase: true });
+        await expect(accountCreatedPage.heading).toHaveText(MESSAGES.accountCreated, {
+          ignoreCase: true,
+        });
       });
 
       await test.step("Click Continue and check 'Logged in as <name>'", async () => {
@@ -44,7 +54,9 @@ test.describe('Register user', () => {
 
       await test.step('Delete the account and click Continue', async () => {
         await homePage.header.deleteAccount();
-        await expect(accountDeletedPage.heading).toHaveText(MESSAGES.accountDeleted, { ignoreCase: true });
+        await expect(accountDeletedPage.heading).toHaveText(MESSAGES.accountDeleted, {
+          ignoreCase: true,
+        });
         await accountDeletedPage.continue();
         await expect(page).toHaveURL('/');
       });

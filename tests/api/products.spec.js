@@ -52,7 +52,9 @@ test.describe('Products API', { tag: '@api' }, () => {
       // Search matches on name or category, so check each hit against both.
       for (const product of body.products) {
         const haystack = normalise(`${product.name} ${product.category.category}`);
-        expect.soft(haystack, `"${product.name}" should relate to "${term}"`).toContain(normalise(term));
+        expect
+          .soft(haystack, `"${product.name}" should relate to "${term}"`)
+          .toContain(normalise(term));
       }
     });
   }

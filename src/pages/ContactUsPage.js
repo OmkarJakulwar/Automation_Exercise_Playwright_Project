@@ -62,7 +62,10 @@ class ContactUsPage extends BasePage {
     return dialogMessage;
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Clicks the "Home" button under the success message and waits for the home page.
+   * @returns {Promise<void>}
+   */
   async goHome() {
     await this.homeButton.click();
     await this.page.waitForURL((url) => url.pathname === '/');

@@ -13,26 +13,30 @@ test.describe('Brand products', () => {
     await productsPage.expectLoaded();
   });
 
-  test('TC19 - View & Cart Brand Products', { tag: ['@smoke', '@regression'] }, async ({ productsPage }) => {
-    const [firstBrand, secondBrand] = brands;
+  test(
+    'TC19 - View & Cart Brand Products',
+    { tag: ['@smoke', '@regression'] },
+    async ({ productsPage }) => {
+      const [firstBrand, secondBrand] = brands;
 
-    await test.step('Check the brands are visible on the left sidebar', async () => {
-      await expect(productsPage.brands.heading).toBeVisible();
-      expect(await productsPage.brands.names()).toEqual(expect.arrayContaining(brands));
-    });
+      await test.step('Check the brands are visible on the left sidebar', async () => {
+        await expect(productsPage.brands.heading).toBeVisible();
+        expect(await productsPage.brands.names()).toEqual(expect.arrayContaining(brands));
+      });
 
-    await test.step(`Click '${firstBrand}' and check its products are shown`, async () => {
-      await productsPage.brands.open(firstBrand);
-      await expect(productsPage.grid.title).toHaveText(`Brand - ${firstBrand} Products`);
-      await expect(productsPage.grid.cards.first()).toBeVisible();
-    });
+      await test.step(`Click '${firstBrand}' and check its products are shown`, async () => {
+        await productsPage.brands.open(firstBrand);
+        await expect(productsPage.grid.title).toHaveText(`Brand - ${firstBrand} Products`);
+        await expect(productsPage.grid.cards.first()).toBeVisible();
+      });
 
-    await test.step(`Click '${secondBrand}' and check its products are shown`, async () => {
-      await productsPage.brands.open(secondBrand);
-      await expect(productsPage.grid.title).toHaveText(`Brand - ${secondBrand} Products`);
-      await expect(productsPage.grid.cards.first()).toBeVisible();
-    });
-  });
+      await test.step(`Click '${secondBrand}' and check its products are shown`, async () => {
+        await productsPage.brands.open(secondBrand);
+        await expect(productsPage.grid.title).toHaveText(`Brand - ${secondBrand} Products`);
+        await expect(productsPage.grid.cards.first()).toBeVisible();
+      });
+    },
+  );
 
   // One test per brand: the page should list exactly the products the API puts under it.
   for (const brand of brands) {

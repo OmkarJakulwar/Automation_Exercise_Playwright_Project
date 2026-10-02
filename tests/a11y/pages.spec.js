@@ -20,7 +20,8 @@ const { scans } = readJson('a11y.json');
  */
 const summarise = (violations) =>
   violations.map(
-    (v) => `${v.id} (${v.impact}): ${v.help} - ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`,
+    (v) =>
+      `${v.id} (${v.impact}): ${v.help} - ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`,
   );
 
 // The site isn't clean and we can't fix it, so a scan that demands zero violations would fail

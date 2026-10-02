@@ -24,10 +24,12 @@
     "update:snapshots": "playwright test --grep @visual --project=chromium --update-snapshots",
     "update:snapshots:docker": "docker run --rm --ipc=host -v \"$PWD\":/work -v /work/node_modules -w /work mcr.microsoft.com/playwright:v1.63.0-noble /bin/bash -c \"npm ci && npx playwright test --grep @visual --project=chromium --update-snapshots\"",
     "har:update": "UPDATE_HAR=1 playwright test tests/mocking/har.spec.js --project=chromium",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "typecheck": "tsc -p jsconfig.json"
+    "typecheck": "tsc -p jsconfig.json",
+    "prepare": "husky",
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "playwright",
@@ -63,5 +65,12 @@
   "private": true,
   "engines": {
     "node": ">=20.19.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
   }
 }

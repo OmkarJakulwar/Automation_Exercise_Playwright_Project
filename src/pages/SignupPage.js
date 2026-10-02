@@ -73,7 +73,10 @@ class SignupPage extends BasePage {
     await this.mobileNumber.fill(user.mobileNumber);
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Clicks "Create Account" and waits for /account_created.
+   * @returns {Promise<void>}
+   */
   async submit() {
     await this.createAccountButton.click();
     await this.page.waitForURL('**/account_created');

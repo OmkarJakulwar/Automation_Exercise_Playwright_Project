@@ -22,6 +22,7 @@ test.describe('New tab', { tag: '@regression' }, () => {
       await test.step('Ctrl/Cmd-click View Product to open it in a new tab', async () => {
         return productsPage.grid.openProductInNewTab(detailCheck.name);
       });
+
     // Fixtures only build page objects for the first tab, so this one we make ourselves.
     const detailTab = new ProductDetailPage(newTab);
 

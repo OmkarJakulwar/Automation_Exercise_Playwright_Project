@@ -41,7 +41,9 @@ class CategorySidebar {
    * @returns {Promise<void>}
    */
   async expand(category) {
-    await this.panel(category).getByRole('link', { name: this.titlePattern(category) }).click();
+    await this.panel(category)
+      .getByRole('link', { name: this.titlePattern(category) })
+      .click();
   }
 
   /**

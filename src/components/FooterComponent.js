@@ -16,7 +16,10 @@ class FooterComponent {
     this.successMessage = this.root.getByText(MESSAGES.subscribed);
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Scrolls down until the subscription box is on screen.
+   * @returns {Promise<void>}
+   */
   async scrollIntoView() {
     await this.subscriptionHeading.scrollIntoViewIfNeeded();
   }

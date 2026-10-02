@@ -70,7 +70,8 @@ class ProductDetailPage extends BasePage {
    */
   async details() {
     /** @param {import('@playwright/test').Locator} locator */
-    const valueOf = async (locator) => (await locator.innerText()).split(':').slice(1).join(':').trim();
+    const valueOf = async (locator) =>
+      (await locator.innerText()).split(':').slice(1).join(':').trim();
     return {
       name: (await this.name.innerText()).trim(),
       category: await valueOf(this.category),

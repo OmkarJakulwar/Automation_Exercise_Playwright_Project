@@ -13,7 +13,10 @@ class AccountDeletedPage extends BasePage {
     return this.heading;
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Clicks "Continue" and waits for the home page.
+   * @returns {Promise<void>}
+   */
   async continue() {
     await this.continueButton.click();
     await this.page.waitForURL((url) => url.pathname === '/');

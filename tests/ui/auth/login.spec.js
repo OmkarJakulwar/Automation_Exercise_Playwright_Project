@@ -28,7 +28,9 @@ test.describe('Login and logout', () => {
 
       await test.step("Delete the account and check 'Account Deleted!' is visible", async () => {
         await homePage.header.deleteAccount();
-        await expect(accountDeletedPage.heading).toHaveText(MESSAGES.accountDeleted, { ignoreCase: true });
+        await expect(accountDeletedPage.heading).toHaveText(MESSAGES.accountDeleted, {
+          ignoreCase: true,
+        });
       });
     },
   );

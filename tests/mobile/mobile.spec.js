@@ -57,6 +57,7 @@ test.describe('Mobile', { tag: '@mobile' }, () => {
       // and the browser APIs. This is the setup a geo- or locale-aware page would need.
       const request = page.waitForRequest((r) => r.resourceType() === 'document');
       await homePage.open();
+      // eslint-disable-next-line playwright/no-conditional-in-test -- engine gap, explained below
       if (browserName === 'webkit') {
         // WebKit adds Accept-Language below the layer Playwright can see, so the header never
         // shows up in request.allHeaders(). The browser-side checks below still cover the locale.
@@ -66,6 +67,7 @@ test.describe('Mobile', { tag: '@mobile' }, () => {
         });
       } else {
         const headers = await (await request).allHeaders();
+        // eslint-disable-next-line playwright/no-conditional-expect -- see the WebKit note above
         expect(headers['accept-language']).toContain(emulation.locale);
       }
 

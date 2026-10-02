@@ -70,7 +70,8 @@ const PRODUCT_IMAGE_URL = '**/get_product_picture/**';
  * @param {number} amount
  * @returns {string}
  */
-const invoiceText = (name, amount) => `Hi ${name}, Your total purchase amount is ${amount}. Thank you`;
+const invoiceText = (name, amount) =>
+  `Hi ${name}, Your total purchase amount is ${amount}. Thank you`;
 const INVOICE_FILE_NAME = 'invoice.txt';
 
 // axe rule sets we scan against: WCAG 2.0 and 2.1, levels A and AA.

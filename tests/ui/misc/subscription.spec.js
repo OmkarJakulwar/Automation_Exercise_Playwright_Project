@@ -8,26 +8,22 @@ test.describe('Footer subscription', () => {
     await homePage.expectLoaded();
   });
 
-  test(
-    'TC10 - Verify Subscription in home page',
-    { tag: '@regression' },
-    async ({ homePage }) => {
-      const { footer } = homePage;
+  test('TC10 - Verify Subscription in home page', { tag: '@regression' }, async ({ homePage }) => {
+    const { footer } = homePage;
 
-      await test.step("Scroll down to the footer and check 'Subscription' is visible", async () => {
-        await homePage.scrollToBottom();
-        await expect(footer.subscriptionHeading).toBeInViewport();
-      });
+    await test.step("Scroll down to the footer and check 'Subscription' is visible", async () => {
+      await homePage.scrollToBottom();
+      await expect(footer.subscriptionHeading).toBeInViewport();
+    });
 
-      await test.step('Enter an email and click the arrow', async () => {
-        await footer.subscribe(uniqueEmail('subscribe'));
-      });
+    await test.step('Enter an email and click the arrow', async () => {
+      await footer.subscribe(uniqueEmail('subscribe'));
+    });
 
-      await test.step('Check the success message is visible', async () => {
-        await expect(footer.successMessage).toBeVisible();
-      });
-    },
-  );
+    await test.step('Check the success message is visible', async () => {
+      await expect(footer.successMessage).toBeVisible();
+    });
+  });
 
   test(
     'TC11 - Verify Subscription in Cart page',

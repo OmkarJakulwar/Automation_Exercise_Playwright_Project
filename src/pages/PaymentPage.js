@@ -61,7 +61,10 @@ class PaymentPage extends BasePage {
     return download;
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Clicks "Continue" on the order-placed page and waits for the home page.
+   * @returns {Promise<void>}
+   */
   async continue() {
     await this.continueButton.click();
     await this.page.waitForURL((url) => url.pathname === '/');

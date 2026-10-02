@@ -17,6 +17,7 @@ test.describe('HAR replay', { tag: '@regression' }, () => {
     baseURL,
     productsPage,
   }) => {
+    // eslint-disable-next-line playwright/no-conditional-in-test -- recording run vs replay run
     if (!UPDATE) {
       // Fail every request to the site, as if it were down. routeFromHAR below is registered
       // later, so it gets first go at each request and only the ones it can't serve end up here.

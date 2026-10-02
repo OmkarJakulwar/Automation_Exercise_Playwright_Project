@@ -57,7 +57,10 @@ class AccountApi {
    * @param {string} [email] - leave it out to send the request with no email param
    */
   getUserDetailByEmail(email) {
-    return this.client.get('getUserDetailByEmail', email === undefined ? {} : { params: { email } });
+    return this.client.get(
+      'getUserDetailByEmail',
+      email === undefined ? {} : { params: { email } },
+    );
   }
 }
 

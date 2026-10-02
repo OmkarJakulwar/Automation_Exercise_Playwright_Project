@@ -1,0 +1,11 @@
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+allure-results/
+allure-report/
+playwright/
+package-lock.json
+# Recorded traffic and copies of the site's pages - not ours to reformat.
+test-data/har/
+docs/

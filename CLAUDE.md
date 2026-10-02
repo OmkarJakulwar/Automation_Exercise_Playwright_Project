@@ -41,6 +41,7 @@ tests/a11y/              axe scans
 tests/mocking/           page.route / HAR examples
 tests/mobile/            device emulation tests
 docs/                    copies of the official test case / API pages
+eslint-rules/            project lint rules (require-ts-check), loaded as the `local` plugin
 ```
 
 ## Commands
@@ -51,7 +52,8 @@ npm run test:chromium       # one browser (fine for day-to-day work)
 npm run test:api            # API project only, no browser
 npm run test:smoke          # --grep @smoke
 npx playwright test tests/ui/auth/register.spec.js --project=chromium
-npm run lint                # must pass with zero errors
+npm run lint                # must pass with zero errors and zero warnings
+npm run format:check        # prettier, same check CI runs (npm run format fixes it)
 npm run typecheck           # tsc over the JSDoc types, must pass too
 npm run report              # open last HTML report
 ```
@@ -87,6 +89,8 @@ The full script list lives in `package.json` and the README.
 - Accounts created outside the `testUser` / `newUser` fixtures must go through `recordCreated()` /
   `recordDeleted()` in `src/utils/accountLedger.js`, so global teardown can sweep leftovers.
 - Re-record the HAR with `npm run har:update` if the products page changes.
+- A pre-commit hook (husky + lint-staged) runs ESLint and Prettier on staged files. Lint
+  disables need a reason: `// eslint-disable-next-line rule -- why`.
 - Saved login is for read-only tests only. Anything that touches the cart uses its own
   `testUser` / `newUser` (see the cart quirk below).
 - Steps shared by several specs in one folder go in a plain `steps.js` next to them (see
@@ -123,7 +127,7 @@ The full script list lives in `package.json` and the README.
 - API tests: assert `status` (HTTP, always 200), `responseCode` and `message`. Messages live in
   `API_MESSAGES` in config/constants.js. Matchers are added in `src/fixtures/matchers.js`.
 - Some JSON responses come back as `text/html`. Parse with the helper in `src/utils/apiResponse.js`.
-- Contact Us success writes the message into *every* `.alert-success`, including the hidden one in
+- Contact Us success writes the message into _every_ `.alert-success`, including the hidden one in
   the footer - scope to `#contact-page`.
 - Payment: the "Your order has been placed successfully!" alert never shows; the form goes straight
   to `/payment_done/<id>` ("Order Placed!"). We assert on that page.
@@ -138,7 +142,7 @@ The full script list lives in `package.json` and the README.
   Wait for the real URL (`waitForURL`) instead - `ProductGrid.openProductInNewTab` does.
 - Engine differences we hit: Firefox asks for zstd and `route.fetch()` returns it undecoded (set
   `accept-encoding`); WebKit hides Accept-Language from `request.allHeaders()`; Chromium reports
-  Asia/Kolkata as "Asia/Calcutta".
+  Asia/Kolkata as "Asia/Calcutta"; Firefox caps how far one `mouse.wheel()` call scrolls.
 - The country dropdown only has 7 values - `COUNTRIES` in `dataFactory.js`.
 - The recommended carousel rotates on its own (hover pauses it) and shows "Rs. 1000" as the name of
   product 3. Find carousel items in the cart by product id, not by the card text.
@@ -152,6 +156,7 @@ The full script list lives in `package.json` and the README.
 Comments should read like a developer explaining something to the person at the next desk.
 
 Do:
+
 - Explain **why**, not what. The code says what; the comment says why we did it this way, what
   problem it solves, or what breaks without it.
 - Plain, direct English. "We", "our", contractions are fine.
@@ -163,6 +168,7 @@ Do:
 - In workflow YAML, a short plain comment per job/step.
 
 Don't:
+
 - Comments that repeat the code (`// click the button`, `// import faker`).
 - Filler/buzzwords: robust, seamless, leverage, comprehensive, "ensure that", utilize,
   facilitate, "this function is responsible for", "it is important to note".

@@ -9,16 +9,20 @@ const { invalidLogins } = readJson('users.json');
 
 test.describe('Account API', { tag: '@api' }, () => {
   test.describe('verifyLogin', () => {
-    test('API 07 - Verify login with valid details', { tag: '@smoke' }, async ({ accountApi, testUser }) => {
-      const { status, responseCode, message } = await accountApi.verifyLogin({
-        email: testUser.email,
-        password: testUser.password,
-      });
+    test(
+      'API 07 - Verify login with valid details',
+      { tag: '@smoke' },
+      async ({ accountApi, testUser }) => {
+        const { status, responseCode, message } = await accountApi.verifyLogin({
+          email: testUser.email,
+          password: testUser.password,
+        });
 
-      expect(status).toBe(200);
-      expect(responseCode).toBe(200);
-      expect(message).toBe(API_MESSAGES.userExists);
-    });
+        expect(status).toBe(200);
+        expect(responseCode).toBe(200);
+        expect(message).toBe(API_MESSAGES.userExists);
+      },
+    );
 
     test('API 08 - Verify login without email parameter', async ({ accountApi }) => {
       const { status, responseCode, message, body } = await accountApi.verifyLogin({
@@ -49,7 +53,10 @@ test.describe('Account API', { tag: '@api' }, () => {
       });
     }
 
-    test('API 10 - Verify login with a wrong password for a real user', async ({ accountApi, testUser }) => {
+    test('API 10 - Verify login with a wrong password for a real user', async ({
+      accountApi,
+      testUser,
+    }) => {
       const { responseCode, message } = await accountApi.verifyLogin({
         email: testUser.email,
         password: `${testUser.password}-wrong`,
@@ -61,25 +68,29 @@ test.describe('Account API', { tag: '@api' }, () => {
   });
 
   test.describe('account lifecycle', () => {
-    test('API 11 - Create/register user account', { tag: '@smoke' }, async ({ accountApi, newUser }) => {
-      // newUser is only data at this point; its fixture deletes the account after the test.
-      const created = await accountApi.createAccount(newUser);
+    test(
+      'API 11 - Create/register user account',
+      { tag: '@smoke' },
+      async ({ accountApi, newUser }) => {
+        // newUser is only data at this point; its fixture deletes the account after the test.
+        const created = await accountApi.createAccount(newUser);
 
-      expect(created.status).toBe(200);
-      expect(created.responseCode).toBe(201);
-      expect(created.message).toBe(API_MESSAGES.userCreated);
+        expect(created.status).toBe(200);
+        expect(created.responseCode).toBe(201);
+        expect(created.message).toBe(API_MESSAGES.userCreated);
 
-      await test.step('The new account can log in', async () => {
-        const { responseCode } = await accountApi.verifyLogin(newUser);
-        expect(responseCode).toBe(200);
-      });
+        await test.step('The new account can log in', async () => {
+          const { responseCode } = await accountApi.verifyLogin(newUser);
+          expect(responseCode).toBe(200);
+        });
 
-      await test.step('Registering the same email again is rejected', async () => {
-        const duplicate = await accountApi.createAccount(newUser);
-        expect(duplicate.responseCode).toBe(400);
-        expect(duplicate.message).toBe(API_MESSAGES.emailAlreadyExists);
-      });
-    });
+        await test.step('Registering the same email again is rejected', async () => {
+          const duplicate = await accountApi.createAccount(newUser);
+          expect(duplicate.responseCode).toBe(400);
+          expect(duplicate.message).toBe(API_MESSAGES.emailAlreadyExists);
+        });
+      },
+    );
 
     test('API 12 - Delete user account', async ({ accountApi, testUser }) => {
       const deleted = await accountApi.deleteAccount(testUser.email, testUser.password);

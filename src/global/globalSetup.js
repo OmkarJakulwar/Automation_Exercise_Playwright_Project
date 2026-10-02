@@ -25,6 +25,7 @@ async function globalSetup(config) {
   } catch (error) {
     throw new Error(
       `automationexercise.com looks unreachable, so there's no point starting the run.\n${error}`,
+      { cause: error },
     );
   } finally {
     await api.dispose();

@@ -44,9 +44,7 @@ function getEnvironment() {
   const env = environments[name];
   if (!env) {
     // Fail loudly - a typo in ENV silently falling back to prod would be a nasty surprise.
-    throw new Error(
-      `Unknown ENV "${name}". Use one of: ${Object.keys(environments).join(', ')}`,
-    );
+    throw new Error(`Unknown ENV "${name}". Use one of: ${Object.keys(environments).join(', ')}`);
   }
   return {
     ...env,

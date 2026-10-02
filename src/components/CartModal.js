@@ -14,14 +14,20 @@ class CartModal {
     this.viewCartLink = this.root.getByRole('link', { name: 'View Cart' });
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Closes the "Added!" popup and stays on the current page.
+   * @returns {Promise<void>}
+   */
   async continueShopping() {
     await this.continueShoppingButton.click();
     // The modal fades out; wait for it so the next hover doesn't land on the backdrop.
     await this.root.waitFor({ state: 'hidden' });
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Follows the popup's "View Cart" link to /view_cart.
+   * @returns {Promise<void>}
+   */
   async viewCart() {
     await this.viewCartLink.click();
     await this.page.waitForURL('**/view_cart');

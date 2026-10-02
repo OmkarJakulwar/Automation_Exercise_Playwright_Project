@@ -8,9 +8,22 @@
     "user": {
       "type": "object",
       "required": [
-        "id", "name", "email", "title", "birth_day", "birth_month", "birth_year",
-        "first_name", "last_name", "company", "address1", "address2",
-        "country", "state", "city", "zipcode"
+        "id",
+        "name",
+        "email",
+        "title",
+        "birth_day",
+        "birth_month",
+        "birth_year",
+        "first_name",
+        "last_name",
+        "company",
+        "address1",
+        "address2",
+        "country",
+        "state",
+        "city",
+        "zipcode"
       ],
       "properties": {
         "id": { "type": "integer" },

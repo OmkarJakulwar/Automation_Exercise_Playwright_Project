@@ -29,7 +29,8 @@ function validateSchema(name, data) {
   if (!validate) throw new Error(`No schema registered as "${name}"`);
   const valid = /** @type {boolean} */ (validate(data));
   const errors = (validate.errors ?? []).map(
-    (e) => `${e.instancePath || '(root)'} ${e.message}${e.params ? ` ${JSON.stringify(e.params)}` : ''}`,
+    (e) =>
+      `${e.instancePath || '(root)'} ${e.message}${e.params ? ` ${JSON.stringify(e.params)}` : ''}`,
   );
   return { valid, errors };
 }

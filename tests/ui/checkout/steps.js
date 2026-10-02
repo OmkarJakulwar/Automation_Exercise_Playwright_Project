@@ -101,9 +101,11 @@ async function proceedToCheckout(cartPage, checkoutPage) {
  */
 async function verifyAddresses(checkoutPage, user) {
   const expected = toAddressBlock(user);
+
   await test.step('Check the delivery address matches the one used at registration', async () => {
     expect(await checkoutPage.readAddress(checkoutPage.deliveryAddress)).toEqual(expected);
   });
+
   await test.step('Check the billing address matches the one used at registration', async () => {
     expect(await checkoutPage.readAddress(checkoutPage.billingAddress)).toEqual(expected);
   });
@@ -116,6 +118,7 @@ async function verifyAddresses(checkoutPage, user) {
  */
 async function verifyOrderReview(checkoutPage, user) {
   await verifyAddresses(checkoutPage, user);
+
   await test.step('Check the order review lists the products and the right total', async () => {
     await expect(checkoutPage.reviewOrderHeading).toBeVisible();
     const items = await checkoutPage.order.items();

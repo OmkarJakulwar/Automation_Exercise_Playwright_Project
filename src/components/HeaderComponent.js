@@ -36,42 +36,66 @@ class HeaderComponent {
     await this.page.waitForURL(url);
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Opens the home page from the nav bar.
+   * @returns {Promise<void>}
+   */
   async goHome() {
     await this.navigate(this.homeLink, (url) => url.pathname === '/');
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Opens /products from the nav bar.
+   * @returns {Promise<void>}
+   */
   async goToProducts() {
     await this.navigate(this.productsLink, '**/products');
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Opens /view_cart from the nav bar.
+   * @returns {Promise<void>}
+   */
   async goToCart() {
     await this.navigate(this.cartLink, '**/view_cart');
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Opens /login from the nav bar.
+   * @returns {Promise<void>}
+   */
   async goToSignupLogin() {
     await this.navigate(this.signupLoginLink, '**/login');
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Opens /test_cases from the nav bar.
+   * @returns {Promise<void>}
+   */
   async goToTestCases() {
     await this.navigate(this.testCasesLink, '**/test_cases');
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Opens /contact_us from the nav bar.
+   * @returns {Promise<void>}
+   */
   async goToContactUs() {
     await this.navigate(this.contactUsLink, '**/contact_us');
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Logs out. The site sends us back to /login.
+   * @returns {Promise<void>}
+   */
   async logout() {
     await this.navigate(this.logoutLink, '**/login');
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Deletes the logged-in account through the UI and lands on "Account Deleted!".
+   * @returns {Promise<void>}
+   */
   async deleteAccount() {
     await this.navigate(this.deleteAccountLink, '**/delete_account');
   }

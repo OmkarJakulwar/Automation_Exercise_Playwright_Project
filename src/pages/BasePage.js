@@ -54,7 +54,10 @@ class BasePage {
     return new RegExp(`${escaped === '/' ? '/' : escaped}([?#].*)?$`);
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Scrolls to the footer.
+   * @returns {Promise<void>}
+   */
   async scrollToBottom() {
     await this.footer.scrollIntoView();
   }
@@ -64,8 +67,15 @@ class BasePage {
    * @returns {Promise<void>}
    */
   async scrollToTopWithMouse() {
-    const y = await this.scrollY();
-    await this.page.mouse.wheel(0, -y);
+    // Firefox caps how far one wheel event scrolls, so a single big delta stops part way down.
+    // Keep wheeling until we're at the top, like a user flicking the wheel a few times.
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const y = await this.scrollY();
+      if (y === 0) return;
+      await this.page.mouse.wheel(0, -y);
+      // wheel() returns before the scroll lands, so wait for the position to actually move.
+      await this.page.waitForFunction((before) => window.scrollY < before, y);
+    }
   }
 
   /**

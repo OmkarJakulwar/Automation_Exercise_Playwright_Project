@@ -30,12 +30,18 @@ class HomePage extends BasePage {
     return this.products.title;
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Clicks the arrow in the bottom-right corner that scrolls back to the top.
+   * @returns {Promise<void>}
+   */
   async clickScrollUpArrow() {
     await this.scrollUpArrow.click();
   }
 
-  /** @returns {Promise<void>} */
+  /**
+   * Scrolls down to the "recommended items" carousel.
+   * @returns {Promise<void>}
+   */
   async scrollToRecommended() {
     await this.recommendedHeading.scrollIntoViewIfNeeded();
   }
