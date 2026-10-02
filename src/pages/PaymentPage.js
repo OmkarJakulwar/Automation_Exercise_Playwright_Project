@@ -78,6 +78,10 @@ class PaymentPage extends BasePage {
     const disposition = (await res.headerValue('content-disposition')) ?? '';
     fs.mkdirSync(path.dirname(savePath), { recursive: true });
     fs.writeFileSync(savePath, await res.text());
+    // The invoice replaced the order page, so go back to it like a user would - the next step
+    // in TC24 clicks "Continue" there.
+    await this.page.goBack();
+    await this.page.waitForURL('**/payment_done/**');
     return { fileName: disposition.match(/filename="?([^";]+)"?/)?.[1] ?? '' };
   }
 
