@@ -26,7 +26,7 @@ src/components/          UI parts shared by many pages (header, footer, sidebars
 src/api/                 ApiClient + one class per API area
 src/fixtures/index.js    custom `test` and `expect` - always import from here in specs
 src/utils/               dataFactory (faker), fileHelper, apiResponse, logger
-src/schemas/             JSON schemas for API responses (ajv)
+src/schemas/             JSON schemas for API responses (ajv) - use expect(body).toMatchSchema('name')
 test-data/               static JSON/CSV data + upload files
 tests/auth.setup.js      creates a user, logs in once, saves storageState
 tests/ui/<area>/         official UI test cases, grouped by feature
@@ -102,6 +102,8 @@ The full script list lives in `package.json` and the README.
 - EU consent dialog (we run from Ireland). Dismissed with `page.addLocatorHandler()`.
 - The API almost always answers HTTP 200; the real status is `body.responseCode`. Assert both.
 - Several endpoints want form data, not JSON - use the `form` option.
+- API tests: assert `status` (HTTP, always 200), `responseCode` and `message`. Messages live in
+  `API_MESSAGES` in config/constants.js. Matchers are added in `src/fixtures/matchers.js`.
 - Some JSON responses come back as `text/html`. Parse with the helper in `src/utils/apiResponse.js`.
 - Contact Us success writes the message into *every* `.alert-success`, including the hidden one in
   the footer - scope to `#contact-page`.

@@ -123,6 +123,33 @@ function toAccountForm(user) {
 }
 
 /**
+ * What getUserDetailByEmail should return for a user. Note the API reads fields under one set of
+ * names (birth_date, firstname) and returns them under another (birth_day, first_name), and it
+ * doesn't return mobile_number at all.
+ * @param {User} user
+ * @returns {Record<string, string>}
+ */
+function toUserDetail(user) {
+  return {
+    name: user.name,
+    email: user.email,
+    title: user.title,
+    birth_day: user.birthDay,
+    birth_month: user.birthMonth,
+    birth_year: user.birthYear,
+    first_name: user.firstName,
+    last_name: user.lastName,
+    company: user.company,
+    address1: user.address1,
+    address2: user.address2,
+    country: user.country,
+    state: user.state,
+    city: user.city,
+    zipcode: user.zipcode,
+  };
+}
+
+/**
  * Builds a fake card. The site doesn't charge anything, so any digits will do.
  * @param {Partial<PaymentCard>} [overrides]
  * @returns {PaymentCard}
@@ -169,6 +196,7 @@ module.exports = {
   uniqueEmail,
   buildUser,
   toAccountForm,
+  toUserDetail,
   buildPaymentCard,
   buildContactMessage,
   buildReview,

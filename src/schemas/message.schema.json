@@ -1,0 +1,11 @@
+{
+  "$id": "message",
+  "title": "Any response that's just a status plus a message (errors, create/update/delete)",
+  "type": "object",
+  "required": ["responseCode", "message"],
+  "additionalProperties": false,
+  "properties": {
+    "responseCode": { "type": "integer", "enum": [200, 201, 400, 404, 405] },
+    "message": { "type": "string", "minLength": 1 }
+  }
+}

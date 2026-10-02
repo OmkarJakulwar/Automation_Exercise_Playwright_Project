@@ -6,7 +6,7 @@
       "password": "WrongPass123!"
     },
     {
-      "case": "valid-looking email with wrong password",
+      "case": "made-up email and password",
       "email": "wrong.password.check@example.com",
       "password": "not-the-password"
     },

@@ -48,11 +48,16 @@ class AccountApi {
     return this.client.post('verifyLogin', { form });
   }
 
+  /** DELETE isn't supported on verifyLogin - used for the 405 check. */
+  deleteVerifyLogin() {
+    return this.client.delete('verifyLogin');
+  }
+
   /**
-   * @param {string} email
+   * @param {string} [email] - leave it out to send the request with no email param
    */
   getUserDetailByEmail(email) {
-    return this.client.get('getUserDetailByEmail', { params: { email } });
+    return this.client.get('getUserDetailByEmail', email === undefined ? {} : { params: { email } });
   }
 }
 

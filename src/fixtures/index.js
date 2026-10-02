@@ -1,9 +1,12 @@
 // @ts-check
-const { test: base, expect } = require('@playwright/test');
+const { test: base } = require('@playwright/test');
+const { expect } = require('./matchers');
 const { getEnvironment } = require('../../config/environments');
 const { BLOCKED_HOSTS } = require('../../config/constants');
 const { ApiClient } = require('../api/ApiClient');
 const { AccountApi } = require('../api/AccountApi');
+const { ProductsApi } = require('../api/ProductsApi');
+const { BrandsApi } = require('../api/BrandsApi');
 const { buildUser } = require('../utils/dataFactory');
 const { createLogger } = require('../utils/logger');
 const { HomePage } = require('../pages/HomePage');
@@ -29,6 +32,8 @@ const env = getEnvironment();
  * @typedef {object} ApiFixtures
  * @property {ApiClient} apiClient - talks to the public API, no browser needed
  * @property {AccountApi} accountApi
+ * @property {ProductsApi} productsApi
+ * @property {BrandsApi} brandsApi
  * @property {User} testUser - registered through the API before the test, deleted after it
  * @property {User} newUser - fresh data only, not registered. Deleted after the test in case the
  *   test registered it through the UI and then failed before its own clean-up step.
@@ -79,13 +84,14 @@ async function deleteQuietly(accountApi, user) {
 // an auto fixture that touches `context` would launch a browser for every API test.
 const apiTest = base.extend(
   /** @type {import('@playwright/test').Fixtures<ApiFixtures, WorkerFixtures, BuiltInTestArgs, BuiltInWorkerArgs>} */ ({
-    apiClient: async ({ request }, use) => {
-      await use(new ApiClient(request, env.apiURL));
+    // Passing testInfo means every API call made in a test shows up as an attachment in the report.
+    apiClient: async ({ request }, use, testInfo) => {
+      await use(new ApiClient(request, env.apiURL, testInfo));
     },
 
-    accountApi: async ({ apiClient }, use) => {
-      await use(new AccountApi(apiClient));
-    },
+    accountApi: async ({ apiClient }, use) => use(new AccountApi(apiClient)),
+    productsApi: async ({ apiClient }, use) => use(new ProductsApi(apiClient)),
+    brandsApi: async ({ apiClient }, use) => use(new BrandsApi(apiClient)),
 
     // Setup and teardown in one place: create the user, hand it to the test, delete it afterwards
     // even if the test failed halfway through.

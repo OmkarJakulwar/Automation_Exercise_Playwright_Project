@@ -25,6 +25,22 @@ const MESSAGES = Object.freeze({
   orderConfirmed: 'Congratulations! Your order has been confirmed!',
 });
 
+// What the API puts in body.message. The HTTP status is 200 for all of these - see ApiClient.
+const API_MESSAGES = Object.freeze({
+  methodNotSupported: 'This request method is not supported.',
+  searchParamMissing: 'Bad request, search_product parameter is missing in POST request.',
+  loginParamMissing: 'Bad request, email or password parameter is missing in POST request.',
+  emailParamMissing: 'Bad request, email parameter is missing in GET request.',
+  userExists: 'User exists!',
+  userNotFound: 'User not found!',
+  userCreated: 'User created!',
+  userUpdated: 'User updated!',
+  accountDeleted: 'Account deleted!',
+  accountNotFound: 'Account not found!',
+  emailAlreadyExists: 'Email already exists!',
+  detailNotFound: 'Account not found with this email, try another email!',
+});
+
 // Hosts that serve ads, tracking and the EU consent banner. Blocking them keeps pages fast and
 // stops the full-page "#google_vignette" ad from hijacking navigation mid-test.
 const BLOCKED_HOSTS = Object.freeze([
@@ -42,4 +58,4 @@ const BLOCKED_HOSTS = Object.freeze([
 // never loads, but a test can drop it from the list to exercise the locator handler.
 const CONSENT_HOST = 'fundingchoicesmessages.google.com';
 
-module.exports = { MESSAGES, BLOCKED_HOSTS, CONSENT_HOST };
+module.exports = { MESSAGES, API_MESSAGES, BLOCKED_HOSTS, CONSENT_HOST };

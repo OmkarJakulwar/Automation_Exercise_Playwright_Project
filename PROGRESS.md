@@ -26,9 +26,10 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 - [x] `npm run typecheck` (tsc over JSDoc, strict) - zero errors
 
 ## Phase 3 - API layer and API tests
-- [ ] ApiClient, ProductsApi, BrandsApi, AccountApi
-- [ ] JSON schemas (ajv)
-- [ ] API 1-14 tests
+- [x] ApiClient, ProductsApi, BrandsApi, AccountApi
+- [x] JSON schemas (ajv)
+- [x] API 1-14 tests (23 tests incl. data-driven search + invalid logins, extra negatives)
+- [x] `toMatchSchema` custom matcher, every API call attached to the report (passwords masked)
 
 ## Phase 4 - UI: auth & misc
 - [ ] TC01 Register User

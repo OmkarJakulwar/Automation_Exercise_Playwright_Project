@@ -1,0 +1,42 @@
+{
+  "$id": "productsList",
+  "title": "GET /api/productsList and POST /api/searchProduct",
+  "type": "object",
+  "required": ["responseCode", "products"],
+  "properties": {
+    "responseCode": { "const": 200 },
+    "products": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/product" }
+    }
+  },
+  "$defs": {
+    "product": {
+      "type": "object",
+      "required": ["id", "name", "price", "brand", "category"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "integer", "minimum": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "price": { "type": "string", "pattern": "^Rs\\. \\d+$" },
+        "brand": { "type": "string", "minLength": 1 },
+        "category": {
+          "type": "object",
+          "required": ["usertype", "category"],
+          "additionalProperties": false,
+          "properties": {
+            "usertype": {
+              "type": "object",
+              "required": ["usertype"],
+              "additionalProperties": false,
+              "properties": {
+                "usertype": { "enum": ["Women", "Men", "Kids"] }
+              }
+            },
+            "category": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}
