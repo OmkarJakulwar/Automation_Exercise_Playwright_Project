@@ -20,6 +20,7 @@ comment in the test explaining the difference.
 ```
 config/environments.js   base URLs and settings per env (qa, staging, prod), picked by ENV
 config/constants.js      UI messages the site shows + ad/consent hosts we block
+config/reporting.js      Allure options: environment block and failure categories
 src/pages/               page objects (BasePage + one class per page)
 src/components/          UI parts shared by many pages (header, footer, sidebars,
                          product grid, "Added!" cart modal)
@@ -56,6 +57,7 @@ npm run lint                # must pass with zero errors and zero warnings
 npm run format:check        # prettier, same check CI runs (npm run format fixes it)
 npm run typecheck           # tsc over the JSDoc types, must pass too
 npm run report              # open last HTML report
+npm run allure:serve        # build and open an Allure report from the last run (needs Java)
 ```
 
 The full script list lives in `package.json` and the README.
@@ -91,6 +93,9 @@ The full script list lives in `package.json` and the README.
 - Re-record the HAR with `npm run har:update` if the products page changes.
 - A pre-commit hook (husky + lint-staged) runs ESLint and Prettier on staged files. Lint
   disables need a reason: `// eslint-disable-next-line rule -- why`.
+- Reports: HTML (`playwright-report/`), JUnit (`test-results/junit.xml`) and Allure
+  (`allure-results/`, cleared by global setup each run). Passing `--reporter=...` on the command
+  line replaces all three. Allure only shows `test.step`s, so keep steps meaningful.
 - Saved login is for read-only tests only. Anything that touches the cart uses its own
   `testUser` / `newUser` (see the cart quirk below).
 - Steps shared by several specs in one folder go in a plain `steps.js` next to them (see

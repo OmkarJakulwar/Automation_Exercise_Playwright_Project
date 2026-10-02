@@ -97,7 +97,9 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 
 ## Phase 10 - Reporting
 
-- [ ] HTML + JUnit + Allure, scripts to generate/open Allure
+- [x] HTML + JUnit + Allure, scripts to generate/open/serve Allure
+- [x] Allure environment block and failure categories (site slow, visual, a11y, API contract, test defects, product defects, flaky) - checked with deliberate failures
+- [x] JUnit test names include the project, HTML report titled with the env, stale Allure results cleared each run
 
 ## Phase 11 - GitHub repository
 

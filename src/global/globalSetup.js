@@ -1,5 +1,7 @@
 // @ts-check
+const fs = require('node:fs');
 const { request } = require('@playwright/test');
+const { ALLURE_RESULTS_DIR } = require('../../config/reporting');
 const { getEnvironment } = require('../../config/environments');
 const { resetLedger } = require('../utils/accountLedger');
 const { createLogger } = require('../utils/logger');
@@ -32,6 +34,11 @@ async function globalSetup(config) {
   }
 
   resetLedger();
+
+  // allure-playwright adds to allure-results and never clears it, so without this one report
+  // would mix this run with every run before it. Safe here: reporters write their first result
+  // after global setup is done.
+  fs.rmSync(ALLURE_RESULTS_DIR, { recursive: true, force: true });
 }
 
 module.exports = globalSetup;

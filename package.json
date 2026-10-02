@@ -29,7 +29,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc -p jsconfig.json",
     "prepare": "husky",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "allure:serve": "allure serve allure-results"
   },
   "keywords": [
     "playwright",

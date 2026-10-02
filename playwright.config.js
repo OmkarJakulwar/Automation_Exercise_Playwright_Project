@@ -1,6 +1,7 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
 const { getEnvironment } = require('./config/environments');
+const { allureOptions } = require('./config/reporting');
 
 const env = getEnvironment();
 const isCI = !!process.env.CI;
@@ -41,9 +42,25 @@ module.exports = defineConfig({
   // CI overrides this with --reporter=blob for sharding; these are for normal runs.
   reporter: [
     [isCI ? 'dot' : 'list'],
-    ['html', { open: 'never', outputFolder: 'playwright-report' }],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
-    ['allure-playwright', { resultsDir: 'allure-results' }],
+    [
+      'html',
+      {
+        open: 'never',
+        outputFolder: 'playwright-report',
+        title: `Automation Exercise (${env.name})`,
+      },
+    ],
+    // The same test runs once per browser, so without the project in the name CI shows several
+    // identical "TC01 - Register User" rows and you can't tell which browser failed.
+    [
+      'junit',
+      {
+        outputFile: 'test-results/junit.xml',
+        includeProjectInTestName: true,
+        stripANSIControlSequences: true,
+      },
+    ],
+    ['allure-playwright', allureOptions(env)],
   ],
 
   use: {
