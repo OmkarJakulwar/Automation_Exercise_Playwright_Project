@@ -1,4 +1,5 @@
 // @ts-check
+const path = require('node:path');
 
 // Text the site shows back to the user. Kept in one place so a copy change on the site is a
 // one-line fix here instead of a hunt through every spec.
@@ -63,4 +64,29 @@ const CONSENT_HOST = 'fundingchoicesmessages.google.com';
 // page's load event back by 10-20s. See the productImages fixture.
 const PRODUCT_IMAGE_URL = '**/get_product_picture/**';
 
-module.exports = { MESSAGES, API_MESSAGES, BLOCKED_HOSTS, CONSENT_HOST, PRODUCT_IMAGE_URL };
+/**
+ * What the downloaded invoice says. The amount is the plain number, without "Rs.".
+ * @param {string} name
+ * @param {number} amount
+ * @returns {string}
+ */
+const invoiceText = (name, amount) => `Hi ${name}, Your total purchase amount is ${amount}. Thank you`;
+const INVOICE_FILE_NAME = 'invoice.txt';
+
+// Written by tests/auth.setup.js, read by tests that reuse the saved login. The folder is
+// git-ignored: the user file holds the throwaway account's password.
+const AUTH_DIR = path.resolve(__dirname, '../playwright/.auth');
+const AUTH_STATE_FILE = path.join(AUTH_DIR, 'user.json');
+const AUTH_USER_FILE = path.join(AUTH_DIR, 'user-data.json');
+
+module.exports = {
+  MESSAGES,
+  API_MESSAGES,
+  BLOCKED_HOSTS,
+  CONSENT_HOST,
+  PRODUCT_IMAGE_URL,
+  invoiceText,
+  INVOICE_FILE_NAME,
+  AUTH_STATE_FILE,
+  AUTH_USER_FILE,
+};

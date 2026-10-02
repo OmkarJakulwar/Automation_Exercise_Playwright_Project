@@ -29,6 +29,7 @@ src/utils/               dataFactory (faker), fileHelper, apiResponse, logger
 src/schemas/             JSON schemas for API responses (ajv) - use expect(body).toMatchSchema('name')
 test-data/               static JSON/CSV data + upload files
 tests/auth.setup.js      creates a user, logs in once, saves storageState
+tests/auth.teardown.js   deletes that user once all dependent projects finish
 tests/ui/<area>/         official UI test cases, grouped by feature
 tests/api/               the 14 API tests
 tests/hybrid/            API setup + UI verification
@@ -74,7 +75,13 @@ The full script list lives in `package.json` and the README.
     no browser fixtures, so the api project never starts a browser.
 - Fixtures worth knowing: `testUser` (registered via API, deleted after), `newUser` (data only,
   deleted after in case the test registered it), `productCatalog` (worker-scoped),
-  `adBlockHosts` (option - override with `test.use()`), `stubProductImages` (option, default on).
+  `adBlockHosts` (option - override with `test.use()`), `stubProductImages` (option, default on),
+  `authUser` (the account behind the saved login - pair with
+  `test.use({ storageState: AUTH_STATE_FILE })`).
+- Saved login is for read-only tests only. Anything that touches the cart uses its own
+  `testUser` / `newUser` (see the cart quirk below).
+- Steps shared by several specs in one folder go in a plain `steps.js` next to them (see
+  `tests/ui/checkout/steps.js`), still wrapped in `test.step`.
 - Page objects:
   - locators defined once (constructor fields or getters), never duplicated across files
   - methods are async and named by user intent (`addProductToCart(name)`, `login(email, pw)`)
@@ -113,6 +120,11 @@ The full script list lives in `package.json` and the README.
   to `/payment_done/<id>` ("Order Placed!"). We assert on that page.
 - Category headings' accessible names start with an icon glyph (" Women"), so match with a regex.
 - Product search matches name OR category, so results don't always contain the search term.
+- The cart is stored per account, not per session: two logins of the same user see the same cart.
+  A guest cart moves into the account on login or signup.
+- After a successful login, use `loginAndWaitForHome()` if the next step clicks something on the
+  home page - add-to-cart clicks before `load` silently do nothing.
+- The invoice is a text file: "Hi <name>, Your total purchase amount is <total>. Thank you".
 - The country dropdown only has 7 values - `COUNTRIES` in `dataFactory.js`.
 - The recommended carousel rotates on its own (hover pauses it) and shows "Rs. 1000" as the name of
   product 3. Find carousel items in the cart by product id, not by the card text.

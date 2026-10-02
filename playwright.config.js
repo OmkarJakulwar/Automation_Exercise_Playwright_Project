@@ -6,9 +6,9 @@ const env = getEnvironment();
 const isCI = !!process.env.CI;
 
 // Desktop browser projects all share the same rules about which folders they pick up.
-// API tests get their own project, mobile tests their own devices, and the setup file only
-// runs as a dependency.
-const desktopIgnore = ['**/api/**', '**/mobile/**', '**/*.setup.js'];
+// API tests get their own project, mobile tests their own devices, and the setup/teardown
+// files only run as a dependency.
+const desktopIgnore = ['**/api/**', '**/mobile/**', '**/*.setup.js', '**/*.teardown.js'];
 
 // Visual baselines and axe results don't change between engines in a way we care about, so we
 // only keep them on Chromium. That keeps the snapshot folder to one set of images.
@@ -59,7 +59,13 @@ module.exports = defineConfig({
       // Logs in once and saves storageState for the tests that need a signed-in user.
       name: 'setup',
       testMatch: /.*\.setup\.js/,
+      teardown: 'cleanup',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // Deletes the account `setup` created, once all the projects that need it are done.
+      name: 'cleanup',
+      testMatch: /.*\.teardown\.js/,
     },
     {
       name: 'chromium',

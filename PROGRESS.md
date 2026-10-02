@@ -58,12 +58,13 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 - [x] TC22 Add to cart from recommended items
 
 ## Phase 6 - UI: checkout
-- [ ] `tests/auth.setup.js` + storageState
-- [ ] TC14 Place order: register while checkout
-- [ ] TC15 Place order: register before checkout
-- [ ] TC16 Place order: login before checkout
-- [ ] TC23 Address details in checkout
-- [ ] TC24 Download invoice
+- [x] `tests/auth.setup.js` + storageState, `auth.teardown.js` deletes the account (project teardown)
+- [x] Saved-session spec (read-only, since the cart is per account)
+- [x] TC14 Place order: register while checkout
+- [x] TC15 Place order: register before checkout
+- [x] TC16 Place order: login before checkout
+- [x] TC23 Address details in checkout
+- [x] TC24 Download invoice
 
 ## Phase 7 - Advanced features
 - [ ] Hybrid tests (API + UI)

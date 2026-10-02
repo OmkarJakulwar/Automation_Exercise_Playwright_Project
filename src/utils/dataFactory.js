@@ -181,6 +181,29 @@ function buildContactMessage(overrides = {}) {
 }
 
 /**
+ * What the delivery and billing blocks on /checkout should show for a user.
+ * @param {User} user
+ * @returns {import('../pages/CheckoutPage').AddressBlock}
+ */
+function toAddressBlock(user) {
+  return {
+    fullName: `${user.title}. ${user.firstName} ${user.lastName}`,
+    lines: [user.company, user.address1, user.address2],
+    cityStatePostcode: `${user.city} ${user.state} ${user.zipcode}`,
+    country: user.country,
+    phone: user.mobileNumber,
+  };
+}
+
+/**
+ * Text for the order comment box on /checkout.
+ * @returns {string}
+ */
+function buildOrderComment() {
+  return faker.lorem.sentence({ min: 6, max: 12 });
+}
+
+/**
  * @returns {{ name: string, email: string, review: string }}
  */
 function buildReview() {
@@ -197,6 +220,8 @@ module.exports = {
   buildUser,
   toAccountForm,
   toUserDetail,
+  toAddressBlock,
+  buildOrderComment,
   buildPaymentCard,
   buildContactMessage,
   buildReview,

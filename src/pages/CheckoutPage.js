@@ -1,5 +1,6 @@
 // @ts-check
 const { BasePage } = require('./BasePage');
+const { CartTable } = require('../components/CartTable');
 
 /**
  * @typedef {object} AddressBlock
@@ -19,9 +20,9 @@ class CheckoutPage extends BasePage {
     // Both address blocks are <ul>s told apart only by id.
     this.deliveryAddress = page.locator('#address_delivery');
     this.billingAddress = page.locator('#address_invoice');
-    this.orderRows = page.locator('#cart_info tbody tr').filter({ has: page.locator('.cart_product') });
-    this.totalAmount = page
-      .locator('#cart_info tbody tr')
+    this.order = new CartTable(page, '#cart_info');
+    this.totalAmount = this.order.root
+      .locator('tbody tr')
       .filter({ hasText: 'Total Amount' })
       .locator('.cart_total_price');
     // The comment box's <label> isn't linked to it, so we scope to its wrapper. A bare

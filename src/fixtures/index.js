@@ -2,7 +2,8 @@
 const { test: base } = require('@playwright/test');
 const { expect } = require('./matchers');
 const { getEnvironment } = require('../../config/environments');
-const { BLOCKED_HOSTS, PRODUCT_IMAGE_URL } = require('../../config/constants');
+const fs = require('node:fs');
+const { BLOCKED_HOSTS, PRODUCT_IMAGE_URL, AUTH_USER_FILE } = require('../../config/constants');
 const { ApiClient } = require('../api/ApiClient');
 const { AccountApi } = require('../api/AccountApi');
 const { ProductsApi } = require('../api/ProductsApi');
@@ -69,6 +70,8 @@ const PLACEHOLDER_PNG = Buffer.from(
  * @property {PaymentPage} paymentPage
  * @property {ContactUsPage} contactUsPage
  * @property {TestCasesPage} testCasesPage
+ * @property {User} authUser - the account behind the saved login from tests/auth.setup.js. Pair it
+ *   with test.use({ storageState: AUTH_STATE_FILE }).
  */
 
 /** @typedef {import('@playwright/test').PlaywrightTestArgs & import('@playwright/test').PlaywrightTestOptions} BuiltInTestArgs */
@@ -203,6 +206,14 @@ const test = apiTest.extend(
     paymentPage: async ({ page }, use) => use(new PaymentPage(page)),
     contactUsPage: async ({ page }, use) => use(new ContactUsPage(page)),
     testCasesPage: async ({ page }, use) => use(new TestCasesPage(page)),
+
+    // eslint-disable-next-line no-empty-pattern
+    authUser: async ({}, use) => {
+      if (!fs.existsSync(AUTH_USER_FILE)) {
+        throw new Error(`${AUTH_USER_FILE} is missing - run with the setup project (don't pass --no-deps)`);
+      }
+      await use(JSON.parse(fs.readFileSync(AUTH_USER_FILE, 'utf8')));
+    },
   }),
 );
 

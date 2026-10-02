@@ -40,6 +40,19 @@ class LoginSignupPage extends BasePage {
   }
 
   /**
+   * Logs in with good credentials and waits for the redirect to the home page to finish loading.
+   * Use this when the next step clicks something on the home page: its add-to-cart buttons are
+   * wired up by jQuery on load, and a click before that does nothing at all.
+   * @param {string} email
+   * @param {string} password
+   * @returns {Promise<void>}
+   */
+  async loginAndWaitForHome(email, password) {
+    await this.login(email, password);
+    await this.page.waitForURL((url) => url.pathname === '/');
+  }
+
+  /**
    * Fills name + email in "New User Signup!" and submits, which takes you to the account form.
    * @param {string} name
    * @param {string} email
