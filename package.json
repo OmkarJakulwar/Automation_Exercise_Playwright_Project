@@ -1,0 +1,42 @@
+{
+  "name": "automation-exercise-playwright",
+  "version": "1.0.0",
+  "description": "End-to-end UI and API test framework for automationexercise.com built with Playwright (JavaScript)",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "keywords": [
+    "playwright",
+    "e2e",
+    "test-automation",
+    "page-object-model",
+    "sdet"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^10.0.1",
+    "@faker-js/faker": "^10.6.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "allure-commandline": "^2.46.1",
+    "allure-playwright": "^3.13.0",
+    "csv-parse": "^7.0.3",
+    "dotenv": "^18.0.5",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.12.0",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.9"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
