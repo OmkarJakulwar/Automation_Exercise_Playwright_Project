@@ -74,7 +74,7 @@ The full script list lives in `package.json` and the README.
     no browser fixtures, so the api project never starts a browser.
 - Fixtures worth knowing: `testUser` (registered via API, deleted after), `newUser` (data only,
   deleted after in case the test registered it), `productCatalog` (worker-scoped),
-  `adBlockHosts` (option - override with `test.use()`).
+  `adBlockHosts` (option - override with `test.use()`), `stubProductImages` (option, default on).
 - Page objects:
   - locators defined once (constructor fields or getters), never duplicated across files
   - methods are async and named by user intent (`addProductToCart(name)`, `login(email, pw)`)
@@ -99,6 +99,8 @@ The full script list lives in `package.json` and the README.
 
 - Google ads, including full-page "vignette" ads (`#google_vignette` in the URL). An auto fixture
   blocks ad/analytics domains with `page.route()` for every UI test.
+- Product thumbnails (`/get_product_picture/<id>`) are slow and hold the `load` event back 10-25s.
+  An auto fixture swaps them for a 1x1 PNG; visual tests set `test.use({ stubProductImages: false })`.
 - EU consent dialog (we run from Ireland). Dismissed with `page.addLocatorHandler()`.
 - The API almost always answers HTTP 200; the real status is `body.responseCode`. Assert both.
 - Several endpoints want form data, not JSON - use the `form` option.

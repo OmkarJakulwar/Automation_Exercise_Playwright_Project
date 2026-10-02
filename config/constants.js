@@ -12,6 +12,7 @@ const MESSAGES = Object.freeze({
   loginError: 'Your email or password is incorrect!',
   emailExists: 'Email Address already exist!',
   getInTouch: 'Get In Touch',
+  contactConfirm: 'Press OK to proceed!',
   contactSuccess: 'Success! Your details have been submitted successfully.',
   subscription: 'Subscription',
   subscribed: 'You have been successfully subscribed!',
@@ -58,4 +59,8 @@ const BLOCKED_HOSTS = Object.freeze([
 // never loads, but a test can drop it from the list to exercise the locator handler.
 const CONSENT_HOST = 'fundingchoicesmessages.google.com';
 
-module.exports = { MESSAGES, API_MESSAGES, BLOCKED_HOSTS, CONSENT_HOST };
+// Product thumbnails are served one by one from this endpoint and are slow enough to hold the
+// page's load event back by 10-20s. See the productImages fixture.
+const PRODUCT_IMAGE_URL = '**/get_product_picture/**';
+
+module.exports = { MESSAGES, API_MESSAGES, BLOCKED_HOSTS, CONSENT_HOST, PRODUCT_IMAGE_URL };

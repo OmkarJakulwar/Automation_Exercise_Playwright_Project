@@ -2,7 +2,7 @@
 const { test: base } = require('@playwright/test');
 const { expect } = require('./matchers');
 const { getEnvironment } = require('../../config/environments');
-const { BLOCKED_HOSTS } = require('../../config/constants');
+const { BLOCKED_HOSTS, PRODUCT_IMAGE_URL } = require('../../config/constants');
 const { ApiClient } = require('../api/ApiClient');
 const { AccountApi } = require('../api/AccountApi');
 const { ProductsApi } = require('../api/ProductsApi');
@@ -24,6 +24,12 @@ const { TestCasesPage } = require('../pages/TestCasesPage');
 
 const log = createLogger('fixtures');
 const env = getEnvironment();
+
+// 1x1 grey PNG served in place of real product images.
+const PLACEHOLDER_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+  'base64',
+);
 
 /** @typedef {import('../utils/dataFactory').User} User */
 /** @typedef {{ id: number, name: string, price: string, brand: string, category: any }} CatalogProduct */
@@ -48,6 +54,9 @@ const env = getEnvironment();
  * @typedef {object} UiFixtures
  * @property {string[]} adBlockHosts - option: hosts the ad blocker aborts. Override with test.use().
  * @property {void} adBlocker - auto fixture, runs for every UI test
+ * @property {boolean} stubProductImages - option: serve a placeholder instead of real product
+ *   images. On by default; visual tests turn it off with test.use().
+ * @property {void} productImages - auto fixture that applies stubProductImages
  * @property {HomePage} homePage
  * @property {LoginSignupPage} loginSignupPage
  * @property {SignupPage} signupPage
@@ -146,6 +155,25 @@ const test = apiTest.extend(
         );
         await use();
         log.debug(`ad blocker aborted ${blocked} requests`);
+      },
+      { auto: true },
+    ],
+
+    stubProductImages: [true, { option: true }],
+
+    // The home and products pages pull ~35 thumbnails from /get_product_picture/<id>, and the
+    // server hands them out slowly: the load event takes 10-25s, and a few parallel workers push
+    // that past the navigation timeout. We wait for load on every navigation (see
+    // HeaderComponent.navigate), so we answer those requests with a 1x1 PNG instead. None of the
+    // functional tests look at the pictures themselves.
+    productImages: [
+      async ({ context, stubProductImages }, use) => {
+        if (stubProductImages) {
+          await context.route(PRODUCT_IMAGE_URL, (route) =>
+            route.fulfill({ contentType: 'image/png', body: PLACEHOLDER_PNG }),
+          );
+        }
+        await use();
       },
       { auto: true },
     ],

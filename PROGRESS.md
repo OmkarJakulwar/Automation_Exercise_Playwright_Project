@@ -32,17 +32,18 @@ Tick items off as they land. Each phase ends with green tests on Chromium, a com
 - [x] `toMatchSchema` custom matcher, every API call attached to the report (passwords masked)
 
 ## Phase 4 - UI: auth & misc
-- [ ] TC01 Register User
-- [ ] TC02 Login with correct credentials
-- [ ] TC03 Login with incorrect credentials
-- [ ] TC04 Logout
-- [ ] TC05 Register with existing email
-- [ ] TC06 Contact Us form
-- [ ] TC07 Test Cases page
-- [ ] TC10 Subscription on home page
-- [ ] TC11 Subscription on cart page
-- [ ] TC25 Scroll up using arrow
-- [ ] TC26 Scroll up without arrow
+- [x] TC01 Register User
+- [x] TC02 Login with correct credentials
+- [x] TC03 Login with incorrect credentials (data-driven from `users.json`)
+- [x] TC04 Logout
+- [x] TC05 Register with existing email
+- [x] TC06 Contact Us form
+- [x] TC07 Test Cases page
+- [x] TC10 Subscription on home page
+- [x] TC11 Subscription on cart page
+- [x] TC25 Scroll up using arrow
+- [x] TC26 Scroll up without arrow
+- [x] Product images stubbed by default (`stubProductImages` option) - real ones held `load` back 10-25s
 
 ## Phase 5 - UI: products & cart
 - [ ] TC08 All products & product detail

@@ -50,4 +50,30 @@ test.describe('Register user', () => {
       });
     },
   );
+
+  test(
+    'TC05 - Register User with existing email',
+    { tag: '@regression' },
+    async ({ homePage, loginSignupPage, testUser }) => {
+      await test.step('Open the home page and check it loaded', async () => {
+        await homePage.open();
+        await homePage.expectLoaded();
+      });
+
+      await test.step("Click 'Signup / Login' and check 'New User Signup!' is visible", async () => {
+        await homePage.header.goToSignupLogin();
+        await expect(loginSignupPage.signupHeading).toBeVisible();
+      });
+
+      await test.step('Enter a name and an already registered email, then click Signup', async () => {
+        // testUser was registered through the API, so its email is taken.
+        await loginSignupPage.startSignup(testUser.name, testUser.email);
+      });
+
+      await test.step("Check the 'Email Address already exist!' error is visible", async () => {
+        await expect(loginSignupPage.signupError).toBeVisible();
+        await expect(loginSignupPage.signupHeading).toBeVisible();
+      });
+    },
+  );
 });
